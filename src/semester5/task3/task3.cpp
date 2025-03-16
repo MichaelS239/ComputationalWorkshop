@@ -5,6 +5,7 @@
 
 #include "calculate_derivatives.h"
 #include "model/function.h"
+#include "util/input_util.h"
 #include "util/table.h"
 
 namespace tasks {
@@ -16,17 +17,12 @@ void Semester5Task3() {
         std::cout << "Choose a function to study [1|2]:" << '\n';
         std::cout << "1) f(x) = x^2 / (1 + x^2)" << '\n';
         std::cout << "2) f(x) = e^(3x)" << '\n';
-        int num;
-        std::cin >> num;
-        while (num != 1 && num != 2) {
-            std::cout << "Enter 1 or 2." << '\n';
-            std::cin >> num;
-        }
+        char num = util::InputChoice('1', '2');
 
         model::Func func;
         model::Func func_prime;
         model::Func func_second_prime;
-        if (num == 1) {
+        if (num == '1') {
             func = semester5_task3::f1;
             func_prime = semester5_task3::f1_prime;
             func_second_prime = semester5_task3::f1_prime2;
@@ -48,14 +44,7 @@ void Semester5Task3() {
         double x0;
         std::cout << "Enter the initial value:" << '\n';
         std::cin >> x0;
-        double h;
-        std::cout << "Enter the step:" << '\n';
-        std::cin >> h;
-        while (h <= 0) {
-            std::cout << "Step must be a positive number." << '\n';
-            std::cout << "Enter the step:" << '\n';
-            std::cin >> h;
-        }
+        double h = util::InputStep();
 
         std::vector<std::pair<double, double>> table =
                 semester5_task3::CalculateTable(x0, h, m, func);
@@ -64,11 +53,7 @@ void Semester5Task3() {
         std::cout << "Proceed to clarification using the Runge rule (r) or print the table of "
                      "derivatives (t):"
                   << '\n';
-        std::cin >> c;
-        while (c != 'r' && c != 't') {
-            std::cout << "Enter 'r' or 't'." << '\n';
-            std::cin >> c;
-        }
+        c = util::InputChoice('r', 't');
         if (c == 'r') {
             auto const& [runge, second_runge] = semester5_task3::CalculateRunge(
                     table, x0, h, m, func, func_prime, func_second_prime);
@@ -86,11 +71,7 @@ void Semester5Task3() {
                                            "|f'(x)-f2'(x)|", "f1''(x)", "|f''(x)-f1''(x)|"});
         }
         std::cout << "Choose a new function (c) or quit (q):" << '\n';
-        std::cin >> c;
-        while (c != 'c' && c != 'q') {
-            std::cout << "Enter 'c' or 'q'." << '\n';
-            std::cin >> c;
-        }
+        c = util::InputChoice('c', 'q');
     }
 }
 

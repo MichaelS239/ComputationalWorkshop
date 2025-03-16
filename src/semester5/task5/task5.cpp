@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "calculate_equation.h"
+#include "util/input_util.h"
 #include "util/table.h"
 
 namespace tasks {
@@ -26,14 +27,7 @@ void Semester5Task5() {
             std::cout << "Enter N:" << '\n';
             std::cin >> n;
         }
-        std::cout << "Enter the step:" << '\n';
-        double h;
-        std::cin >> h;
-        while (h <= 0) {
-            std::cout << "Step must be a positive number." << '\n';
-            std::cout << "Enter the step:" << '\n';
-            std::cin >> h;
-        }
+        double h = util::InputStep();
 
         std::vector<std::vector<double>> taylor_table = semester5_task5::CompareWithSolution(
                 -2, n + 1, h, semester5_task5::CalculateTaylor);
@@ -87,11 +81,7 @@ void Semester5Task5() {
         std::cout << '\n';
 
         std::cout << "Do you want to enter a new number of points and a new step? [y|n]" << '\n';
-        std::cin >> c;
-        while (c != 'y' && c != 'n') {
-            std::cout << "Enter 'y' or 'n'." << '\n';
-            std::cin >> c;
-        }
+        c = util::InputChoice('y', 'n');
     }
 }
 

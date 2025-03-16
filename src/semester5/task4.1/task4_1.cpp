@@ -12,6 +12,7 @@
 #include "calculate_integral.h"
 #include "model/integral_calculator.h"
 #include "model/polynomial.h"
+#include "util/input_util.h"
 #include "util/matrix_util.h"
 #include "util/table.h"
 
@@ -32,25 +33,7 @@ void Semester5Task4_1() {
         std::cin >> n;
     }
 
-    std::vector<double> points = std::vector<double>(n);
-    std::cout << "Enter the points:" << '\n';
-    for (std::size_t i = 0; i != n; ++i) {
-        while (true) {
-            std::cin >> points[i];
-            bool flag = true;
-            for (std::size_t j = 0; j != i; ++j) {
-                if (points[i] == points[j]) {
-                    flag = false;
-                    break;
-                }
-            }
-            if (flag) {
-                break;
-            } else {
-                std::cout << "Points must not repeat. Enter the point again:" << '\n';
-            }
-        }
-    }
+    std::vector<double> points = util::InputPoints(n);
     std::cout << "Weight function: ρ(x) = -xln(x)" << '\n';
     auto [matrix, vector] = semester5_task4_1::CreateSystem(points);
     std::vector<double> numbers = std::vector<double>(vector.size(), 0);

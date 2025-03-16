@@ -6,24 +6,7 @@
 
 #include "calculate_roots.h"
 #include "model/root_calculator.h"
-
-namespace semester5_task1 {
-int InputSegments(double a, double b) {
-    int n;
-    std::cout << "Enter the number of partition segments for the segment [" << a << ", " << b
-              << "]:" << '\n';
-    std::cin >> n;
-    while (n < 2) {
-        std::cout << "The number of partition segments must be greater than or equal to two."
-                  << '\n';
-        std::cout << "Enter the number of partition segments for the segment [" << a << ", " << b
-                  << "]:" << '\n';
-        std::cin >> n;
-    }
-    return n;
-}
-
-}  // namespace semester5_task1
+#include "util/input_util.h"
 
 namespace tasks {
 
@@ -33,19 +16,12 @@ void Semester5Task1() {
 
     model::RootCalculator root_calculator(semester5_task1::f, semester5_task1::f_prime);
 
-    double a, b;
-    std::cout << "Enter root search boundaries (A and B):" << '\n';
-    std::cin >> a >> b;
-    while (a > b) {
-        std::cout << "The left boundary must be less than or equal to the right one." << '\n';
-        std::cout << "Enter root search boundaries (A and B):" << '\n';
-        std::cin >> a >> b;
-    }
+    auto [a, b] = util::InputBoundaries("root search");
 
     std::vector<std::pair<double, double>> root_segments;
     char c = 'y';
     while (c == 'y') {
-        int n = semester5_task1::InputSegments(a, b);
+        int n = util::InputSegments(a, b, 2);
         root_segments = root_calculator.FindRootSegments(a, b, n);
         std::cout << "There were found " << root_segments.size()
                   << " partition segments that contain roots of the equation f(x) = 0 on the "
@@ -57,11 +33,7 @@ void Semester5Task1() {
         std::cout << "Do you want to change the number of partition segments (if it increases, it "
                      "may be possible to find new roots)? [y|n]"
                   << '\n';
-        std::cin >> c;
-        while (c != 'y' && c != 'n') {
-            std::cout << "Enter 'y' or 'n'." << '\n';
-            std::cin >> c;
-        }
+        c = util::InputChoice('y', 'n');
     }
 
     double eps;

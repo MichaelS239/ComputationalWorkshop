@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "calculate_polynomial.h"
+#include "util/input_util.h"
 #include "util/table.h"
 
 namespace tasks {
@@ -23,14 +24,7 @@ void Semester5Task2() {
         std::cin >> m;
     }
 
-    double a, b;
-    std::cout << "Enter interpolation segment boundaries (A and B):" << '\n';
-    std::cin >> a >> b;
-    while (a > b) {
-        std::cout << "The left boundary must be less than or equal to the right one." << '\n';
-        std::cout << "Enter interpolation segment boundaries (A and B):" << '\n';
-        std::cin >> a >> b;
-    }
+    auto [a, b] = util::InputBoundaries("interpolation segment");
 
     std::vector<std::pair<double, double>> table = semester5_task2::CalculateTable(a, b, m);
     std::cout << "The table of function values:" << '\n';
@@ -68,11 +62,7 @@ void Semester5Task2() {
         std::cout << "Error of interpolation: " << std::setprecision(15) << dif << '\n';
         std::cout << '\n';
         std::cout << "Do you want to enter new values of x and n? [y|n]" << '\n';
-        std::cin >> c;
-        while (c != 'y' && c != 'n') {
-            std::cout << "Enter 'y' or 'n'." << '\n';
-            std::cin >> c;
-        }
+        c = util::InputChoice('y', 'n');
     }
 }
 

@@ -9,6 +9,7 @@
 #include "calculate_integral.h"
 #include "model/function.h"
 #include "model/polynomial.h"
+#include "util/input_util.h"
 
 namespace tasks {
 void Semester5Task4_2() {
@@ -16,12 +17,7 @@ void Semester5Task4_2() {
     std::cout << "Function to study: e^x * sin(x)" << '\n';
     std::cout << "Do you wish to find the integral of f(x) or of a random polynomial? [1|2]"
               << '\n';
-    char c;
-    std::cin >> c;
-    while (c != '1' && c != '2') {
-        std::cout << "Enter '1' or '2'." << '\n';
-        std::cin >> c;
-    }
+    char c = util::InputChoice('1', '2');
     model::Polynomial polynomial;
     if (c == '2') {
         std::cout << "Enter the degree of the polynomial:" << '\n';
@@ -36,14 +32,7 @@ void Semester5Task4_2() {
         polynomial = model::Polynomial::CreateFromRandom(n);
         std::cout << "Polynomial: " << polynomial.ToString() << '\n';
     }
-    std::cout << "Enter the boundaries of the integration segment (A and B):" << '\n';
-    double a, b;
-    std::cin >> a >> b;
-    while (a > b) {
-        std::cout << "The left boundary must be less than or equal to the right one." << '\n';
-        std::cout << "Enter the boundaries of the integration segment (A and B):" << '\n';
-        std::cin >> a >> b;
-    }
+    auto [a, b] = util::InputBoundaries("integration segment");
 
     model::Func f;
     double integral;

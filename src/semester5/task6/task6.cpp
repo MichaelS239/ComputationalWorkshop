@@ -14,6 +14,7 @@
 #include "model/polynomial.h"
 #include "model/root_calculator.h"
 #include "util/create_system_matrix.h"
+#include "util/input_util.h"
 #include "util/matrix_util.h"
 #include "util/table.h"
 
@@ -36,25 +37,7 @@ void Semester5Task6() {
         std::cin >> n;
     }
 
-    std::vector<double> points = std::vector<double>(n);
-    std::cout << "Enter the points:" << '\n';
-    for (std::size_t i = 0; i != n; ++i) {
-        while (true) {
-            std::cin >> points[i];
-            bool flag = true;
-            for (std::size_t j = 0; j != i; ++j) {
-                if (points[i] == points[j]) {
-                    flag = false;
-                    break;
-                }
-            }
-            if (flag) {
-                break;
-            } else {
-                std::cout << "Points must not repeat. Enter the point again:" << '\n';
-            }
-        }
-    }
+    std::vector<double> points = util::InputPoints(n);
     std::cout << "Weight function: ρ(x) = -xln(x)" << '\n';
     std::vector<double> moments = semester5_task6::CalculateMoments(n);
     std::vector<double> numbers = std::vector<double>(moments.size(), 0);

@@ -12,7 +12,7 @@
 #include "model/polynomial.h"
 #include "util/input_util.h"
 
-namespace util {
+namespace semester5_task4_3 {
 void PrintIntegrals(std::vector<std::pair<std::string, double>> const& integrals, double integral) {
     for (std::size_t i = 0; i != integrals.size(); ++i) {
         std::cout << "Approximate value of the intergal of the function obtained by the composite "
@@ -25,7 +25,7 @@ void PrintIntegrals(std::vector<std::pair<std::string, double>> const& integrals
     }
 }
 
-}  // namespace util
+}  // namespace semester5_task4_3
 
 namespace tasks {
 void Semester5Task4_3() {
@@ -66,7 +66,7 @@ void Semester5Task4_3() {
 
     std::cout << "Approximate values for " << n << " partition segments:" << '\n';
     auto integrals = semester5_task4_3::CalculateIntegrals(a, b, n, f);
-    util::PrintIntegrals(integrals, integral);
+    semester5_task4_3::PrintIntegrals(integrals, integral);
     std::cout << '\n';
 
     std::cout << "Enter the number l in order to increase the number of partition segments l "
@@ -84,11 +84,11 @@ void Semester5Task4_3() {
     n *= l;
     std::cout << "Approximate values for " << n << " partition segments:" << '\n';
     auto new_integrals = semester5_task4_3::CalculateIntegrals(a, b, n, f);
-    util::PrintIntegrals(new_integrals, integral);
+    semester5_task4_3::PrintIntegrals(new_integrals, integral);
     std::cout << '\n';
     std::cout << "Clarified values by the Runge rule:" << '\n';
     auto runge_integrals = semester5_task4_3::CalculateRunge(integrals, new_integrals, l);
-    util::PrintIntegrals(runge_integrals, integral);
+    semester5_task4_3::PrintIntegrals(runge_integrals, integral);
 }
 
 }  // namespace tasks

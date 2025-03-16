@@ -17,7 +17,7 @@
 
 namespace tasks {
 void Semester5Task4_1() {
-    std::cout << "Definite integral calculation" << '\n';
+    std::cout << "Numerical weighted integral calculation" << '\n';
     std::cout << "Function to study: f(x) = sin(x)" << '\n';
     std::cout << "Segment: [0, 1]" << '\n';
     std::cout << "Precise value of the integral: " << std::setprecision(15)

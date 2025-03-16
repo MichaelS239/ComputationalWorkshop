@@ -33,6 +33,7 @@ void PrintConds(model::Matrix const &matrix) {
 
 namespace tasks {
 void Semester6Task1() {
+    std::cout << "Condition numbers of a matrix" << '\n';
     model::Matrix matrix1 = model::Matrix::CreateDiagonal(3, 2);
     semester6_task1::PrintConds(matrix1);
     model::Matrix matrix2 = model::Matrix::CreateDiagonal(4, 2);

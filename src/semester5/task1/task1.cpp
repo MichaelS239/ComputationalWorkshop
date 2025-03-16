@@ -28,7 +28,7 @@ int InputSegments(double a, double b) {
 namespace tasks {
 
 void Semester5Task1() {
-    std::cout << "Numerical methods for solving nonlinear equations" << '\n';
+    std::cout << "Root-finding algorithms" << '\n';
     std::cout << "Function under study: f(x) = 8*cos(x)-x-6" << '\n';
 
     model::RootCalculator root_calculator(semester5_task1::f, semester5_task1::f_prime);

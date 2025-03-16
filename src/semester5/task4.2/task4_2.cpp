@@ -12,7 +12,7 @@
 
 namespace tasks {
 void Semester5Task4_2() {
-    std::cout << "Definite integral calculation" << '\n';
+    std::cout << "Numerical integration using simple quadrature formulas" << '\n';
     std::cout << "Function to study: e^x * sin(x)" << '\n';
     std::cout << "Do you wish to find the integral of f(x) or of a random polynomial? [1|2]"
               << '\n';

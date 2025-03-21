@@ -80,7 +80,7 @@ double Matrix::VolumeConditionNumber() const {
 double Matrix::AngleConditionNumber() const {
     double result = 0;
 
-    std::vector<std::vector<double>> inverse_matrix = util::CalculateInverseMatrix(matrix_);
+    Matrix inverse_matrix = util::CalculateInverseMatrix(matrix_);
     for (std::size_t i = 0; i != matrix_.size(); ++i) {
         double scalar_product = 0;
         for (std::size_t j = 0; j != matrix_.size(); ++j) {

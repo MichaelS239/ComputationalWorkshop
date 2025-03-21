@@ -11,6 +11,22 @@
 namespace model {
 class Matrix {
 private:
+    class MatrixRow {
+    private:
+        double* row_;
+
+    public:
+        MatrixRow(double* row) : row_(row) {}
+
+        double const& operator[](std::size_t i) const {
+            return row_[i];
+        }
+
+        double& operator[](std::size_t i) {
+            return row_[i];
+        }
+    };
+
     std::vector<std::vector<double>> matrix_;
 
     void CalculateDeterminant(std::vector<bool> available_indices, unsigned depth,
@@ -39,12 +55,18 @@ public:
         matrix_ = std::move(matrix);
     }
 
+    Matrix(std::size_t n) : matrix_(n, std::vector<double>(n)) {}
+
     std::size_t Size() const {
         return matrix_.size();
     }
 
     std::vector<std::vector<double>> GetMatrix() const {
         return matrix_;
+    }
+
+    MatrixRow operator[](std::size_t i) {
+        return &matrix_[i][0];
     }
 
     double Determinant() const;

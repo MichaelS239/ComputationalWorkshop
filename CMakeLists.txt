@@ -28,6 +28,7 @@ include_directories(
     "src/semester5/task5"
     "src/semester5/task6"
     "src/semester6/task1"
+    "src/semester6/task2"
 )
 
 include_directories(SYSTEM "lib/eigen")
@@ -46,10 +47,10 @@ if(SEMESTER_NUM STREQUAL "5")
         message(FATAL_ERROR "Error: wrong task number")
     endif()
 elseif(SEMESTER_NUM STREQUAL "6")
-    if(TASK_NUM STREQUAL "1")
+    if(TASK_NUM STREQUAL "1" OR TASK_NUM STREQUAL "2")
         file(GLOB_RECURSE lib_sources "src/util/*.h*" "src/util/*.cpp*" "src/util/*.cc*" "src/model/*.h*" "src/model/*.cpp*" "src/model/*.cc*"
-        "src/semester6/task1/*.h*" "src/semester6/task1/*.cpp*" "src/semester6/task1/*.cc*")
-        set(run_sources "src/semester6/task1/main.cpp")
+        src/semester6/task${TASK_NUM}/*.h* src/semester6/task${TASK_NUM}/*.cpp* src/semester6/task${TASK_NUM}/*.cc*)
+        set(run_sources src/semester6/task${TASK_NUM}/main.cpp)
     elseif(TASK_NUM STREQUAL "-1")
         message(FATAL_ERROR "Error: no task number")
     else()

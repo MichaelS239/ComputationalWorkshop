@@ -33,6 +33,14 @@ void Semester6Task2() {
         std::cout << third_solution[i] << " ";
     }
     std::cout << '\n';
+
+    model::Matrix inv1 = matrix.Inverse();
+    model::Matrix inv2 = matrix.Inverse(true);
+    std::cout << inv1.ToString() << '\n';
+    std::cout << inv2.ToString() << '\n';
+
+    std::cout << matrix.Determinant() << '\n';
+    std::cout << matrix.Determinant(true) << '\n';
 }
 
 }  // namespace tasks

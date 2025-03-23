@@ -77,9 +77,9 @@ public:
         return &matrix_[i][0];
     }
 
-    double Determinant() const;
+    double Determinant(bool use_lu = false) const;
     double Norm() const;
-    Matrix Inverse() const;
+    Matrix Inverse(bool use_lu = false) const;
     std::vector<double> SolveSystem(std::vector<double> const& vector,
                                     SolveMethod const solve_method = SolveMethod::Library) const;
     std::pair<Matrix, std::vector<double>> GaussElimination(

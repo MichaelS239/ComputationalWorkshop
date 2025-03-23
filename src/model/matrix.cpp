@@ -49,8 +49,61 @@ Matrix Matrix::Inverse() const {
     return util::CalculateInverseMatrix(matrix_);
 }
 
-std::vector<double> Matrix::SolveSystem(std::vector<double> const& vector) const {
-    return util::SolveSystem(matrix_, vector);
+std::vector<double> Matrix::SolveSystem(std::vector<double> const& vector,
+                                        SolveMethod const solve_method) const {
+    std::vector<double> solution;
+    switch (solve_method) {
+        case model::SolveMethod::Library: {
+            solution = util::SolveSystem(matrix_, vector);
+            break;
+        }
+        case model::SolveMethod::GaussElimination: {
+            auto const& [new_matrix, new_vector] = GaussElimination(vector);
+            solution = new_matrix.SolveUpperTriangularSystem(new_vector);
+            break;
+        }
+        case model::SolveMethod::LUDecomposition:
+            break;
+        case model::SolveMethod::QRDecomposition:
+            break;
+        default:
+            break;
+    }
+
+    return solution;
+}
+
+std::vector<double> Matrix::SolveUpperTriangularSystem(std::vector<double> const& vector) const {
+    std::vector<double> solution = vector;
+    for (std::size_t k = matrix_.size() - 1; k != 0; --k) {
+        for (std::size_t i = 0; i != k; ++i) {
+            solution[i] -= solution[k] * matrix_[i][k];
+        }
+    }
+    return solution;
+}
+
+std::pair<Matrix, std::vector<double>> Matrix::GaussElimination(
+        std::vector<double> const& vector) const {
+    Matrix matrix_copy{matrix_};
+    std::vector<double> vector_copy = vector;
+
+    for (std::size_t k = 0; k != matrix_.size(); ++k) {
+        double tmp = matrix_copy[k][k];
+        for (std::size_t i = k; i != matrix_.size(); ++i) {
+            matrix_copy[k][i] /= tmp;
+        }
+        vector_copy[k] /= tmp;
+        for (std::size_t i = k + 1; i != matrix_.size(); ++i) {
+            tmp = matrix_copy[i][k];
+            for (std::size_t j = k; j != matrix_.size(); ++j) {
+                matrix_copy[i][j] -= matrix_copy[k][j] * tmp;
+            }
+            vector_copy[i] -= vector_copy[k] * tmp;
+        }
+    }
+
+    return {std::move(matrix_copy), std::move(vector_copy)};
 }
 
 double Matrix::NormConditionNumber() const {

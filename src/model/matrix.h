@@ -6,6 +6,7 @@
 #include <utility>
 #include <vector>
 
+#include "model/solve_methods.h"
 #include "util/matrix_util.h"
 
 namespace model {
@@ -31,6 +32,7 @@ private:
 
     void CalculateDeterminant(std::vector<bool> available_indices, unsigned depth,
                               double& result) const;
+    std::vector<double> SolveUpperTriangularSystem(std::vector<double> const& vector) const;
 
 public:
     Matrix() = default;
@@ -57,6 +59,8 @@ public:
 
     Matrix(std::size_t n) : matrix_(n, std::vector<double>(n)) {}
 
+    Matrix(std::initializer_list<std::vector<double>> matrix) : matrix_(matrix) {}
+
     std::size_t Size() const {
         return matrix_.size();
     }
@@ -72,7 +76,11 @@ public:
     double Determinant() const;
     double Norm() const;
     Matrix Inverse() const;
-    std::vector<double> SolveSystem(std::vector<double> const& vector) const;
+    std::vector<double> SolveSystem(std::vector<double> const& vector,
+                                    SolveMethod const solve_method = SolveMethod::Library) const;
+    std::pair<Matrix, std::vector<double>> GaussElimination(
+            std::vector<double> const& vector) const;
+
     double NormConditionNumber() const;
     double VolumeConditionNumber() const;
     double AngleConditionNumber() const;

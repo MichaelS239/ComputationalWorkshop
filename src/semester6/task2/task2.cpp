@@ -19,12 +19,18 @@ void Semester6Task2() {
     std::vector<double> first_solution = matrix.SolveSystem(vector);
     std::vector<double> second_solution =
             matrix.SolveSystem(vector, model::SolveMethod::GaussElimination);
+    std::vector<double> third_solution =
+            matrix.SolveSystem(vector, model::SolveMethod::LUDecomposition);
     for (std::size_t i = 0; i != first_solution.size(); ++i) {
         std::cout << first_solution[i] << " ";
     }
     std::cout << '\n';
     for (std::size_t i = 0; i != second_solution.size(); ++i) {
         std::cout << second_solution[i] << " ";
+    }
+    std::cout << '\n';
+    for (std::size_t i = 0; i != third_solution.size(); ++i) {
+        std::cout << third_solution[i] << " ";
     }
     std::cout << '\n';
 }

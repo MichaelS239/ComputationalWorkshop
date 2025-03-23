@@ -33,6 +33,7 @@ private:
     void CalculateDeterminant(std::vector<bool> available_indices, unsigned depth,
                               double& result) const;
     std::vector<double> SolveUpperTriangularSystem(std::vector<double> const& vector) const;
+    std::vector<double> SolveLowerTriangularSystem(std::vector<double> const& vector) const;
 
 public:
     Matrix() = default;
@@ -80,6 +81,7 @@ public:
                                     SolveMethod const solve_method = SolveMethod::Library) const;
     std::pair<Matrix, std::vector<double>> GaussElimination(
             std::vector<double> const& vector) const;
+    std::pair<Matrix, Matrix> LUDecomposition() const;
 
     double NormConditionNumber() const;
     double VolumeConditionNumber() const;

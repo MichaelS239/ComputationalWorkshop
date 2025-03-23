@@ -62,8 +62,12 @@ std::vector<double> Matrix::SolveSystem(std::vector<double> const& vector,
             solution = new_matrix.SolveUpperTriangularSystem(new_vector);
             break;
         }
-        case model::SolveMethod::LUDecomposition:
+        case model::SolveMethod::LUDecomposition: {
+            auto const& [l, u] = LUDecomposition();
+            std::vector<double> first_solution = l.SolveLowerTriangularSystem(vector);
+            solution = u.SolveUpperTriangularSystem(first_solution);
             break;
+        }
         case model::SolveMethod::QRDecomposition:
             break;
         default:
@@ -76,7 +80,19 @@ std::vector<double> Matrix::SolveSystem(std::vector<double> const& vector,
 std::vector<double> Matrix::SolveUpperTriangularSystem(std::vector<double> const& vector) const {
     std::vector<double> solution = vector;
     for (std::size_t k = matrix_.size() - 1; k != 0; --k) {
+        solution[k] /= matrix_[k][k];
         for (std::size_t i = 0; i != k; ++i) {
+            solution[i] -= solution[k] * matrix_[i][k];
+        }
+    }
+    return solution;
+}
+
+std::vector<double> Matrix::SolveLowerTriangularSystem(std::vector<double> const& vector) const {
+    std::vector<double> solution = vector;
+    for (std::size_t k = 0; k != matrix_.size(); ++k) {
+        solution[k] /= matrix_[k][k];
+        for (std::size_t i = k + 1; i != matrix_.size(); ++i) {
             solution[i] -= solution[k] * matrix_[i][k];
         }
     }
@@ -104,6 +120,33 @@ std::pair<Matrix, std::vector<double>> Matrix::GaussElimination(
     }
 
     return {std::move(matrix_copy), std::move(vector_copy)};
+}
+
+std::pair<Matrix, Matrix> Matrix::LUDecomposition() const {
+    Matrix l{matrix_.size()};
+    Matrix u{matrix_.size()};
+
+    for (std::size_t i = 0; i != matrix_.size(); ++i) {
+        l[i][0] = matrix_[i][0];
+        u[0][i] = matrix_[0][i] / l[0][0];
+    }
+
+    for (std::size_t i = 0; i != matrix_.size(); ++i) {
+        for (std::size_t j = i; j != matrix_.size(); ++j) {
+            l[j][i] = matrix_[j][i];
+            for (std::size_t k = 0; k != i; ++k) {
+                l[j][i] -= l[j][k] * u[k][i];
+            }
+        }
+        for (std::size_t j = i; j != matrix_.size(); ++j) {
+            u[i][j] = matrix_[i][j];
+            for (std::size_t k = 0; k != i; ++k) {
+                u[i][j] -= l[i][k] * u[k][j];
+            }
+            u[i][j] /= l[i][i];
+        }
+    }
+    return {std::move(l), std::move(u)};
 }
 
 double Matrix::NormConditionNumber() const {

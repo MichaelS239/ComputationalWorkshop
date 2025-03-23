@@ -92,6 +92,8 @@ public:
             std::vector<double> const& vector) const;
     std::pair<std::shared_ptr<Matrix>, std::shared_ptr<Matrix>> LUDecomposition() const;
     std::pair<std::shared_ptr<Matrix>, std::shared_ptr<Matrix>> QRDecomposition() const;
+    void CacheLUDecomposition();
+    void CacheQRDecomposition();
 
     double NormConditionNumber() const;
     double VolumeConditionNumber() const;

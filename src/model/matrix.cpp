@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <cstddef>
+#include <memory>
 #include <random>
 #include <sstream>
 #include <vector>
@@ -238,6 +239,18 @@ std::pair<std::shared_ptr<Matrix>, std::shared_ptr<Matrix>> Matrix::QRDecomposit
     q.SelfTranspose();
 
     return {std::make_shared<Matrix>(q), std::make_shared<Matrix>(r)};
+}
+
+void Matrix::CacheLUDecomposition() {
+    auto const& [l, u] = LUDecomposition();
+    l_cache_ = l;
+    u_cache_ = u;
+}
+
+void Matrix::CacheQRDecomposition() {
+    auto const& [q, r] = QRDecomposition();
+    q_cache_ = q;
+    r_cache_ = r;
 }
 
 double Matrix::NormConditionNumber() const {

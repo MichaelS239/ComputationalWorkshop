@@ -41,12 +41,17 @@ void Semester6Task2() {
     std::cout << '\n';
 
     model::Matrix inv1 = matrix.Inverse();
-    model::Matrix inv2 = matrix.Inverse(true);
+    model::Matrix inv2 = matrix.Inverse(model::SolveMethod::GaussElimination);
+    model::Matrix inv3 = matrix.Inverse(model::SolveMethod::LUDecomposition);
+    model::Matrix inv4 = matrix.Inverse(model::SolveMethod::QRDecomposition);
     std::cout << inv1.ToString() << '\n';
     std::cout << inv2.ToString() << '\n';
+    std::cout << inv3.ToString() << '\n';
+    std::cout << inv4.ToString() << '\n';
 
     std::cout << matrix.Determinant() << '\n';
-    std::cout << matrix.Determinant(true) << '\n';
+    std::cout << matrix.Determinant(model::CalculationMethod::LUDecomposition) << '\n';
+    std::cout << matrix.Determinant(model::CalculationMethod::QRDecomposition) << '\n';
 }
 
 }  // namespace tasks

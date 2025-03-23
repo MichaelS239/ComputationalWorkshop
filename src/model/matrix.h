@@ -80,9 +80,9 @@ public:
         return &matrix_[i][0];
     }
 
-    double Determinant(bool use_lu = false) const;
+    double Determinant(CalculationMethod calc_method = CalculationMethod::Library) const;
     double Norm() const;
-    Matrix Inverse(bool use_lu = false) const;
+    Matrix Inverse(SolveMethod calc_method = SolveMethod::Library) const;
     Matrix Transpose() const;
     void SelfTranspose();
     std::vector<double> MultiplyByVector(std::vector<double> const& vector) const;

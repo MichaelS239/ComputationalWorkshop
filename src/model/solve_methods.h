@@ -1,6 +1,8 @@
 #pragma once
 
 namespace model {
-enum SolveMethod { Library, GaussElimination, LUDecomposition, QRDecomposition };
+enum class SolveMethod { Library, GaussElimination, LUDecomposition, QRDecomposition };
+
+enum class CalculationMethod { Library, LUDecomposition, QRDecomposition };
 
 }  // namespace model

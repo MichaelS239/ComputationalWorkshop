@@ -29,18 +29,32 @@ void Matrix::CalculateDeterminant(std::vector<bool> available_indices, unsigned 
     }
 }
 
-double Matrix::Determinant(bool use_lu) const {
-    if (!use_lu) {
-        double det;
-        CalculateDeterminant(std::vector<bool>(matrix_.size(), true), 0U, det);
-        return det;
+double Matrix::Determinant(CalculationMethod calc_method) const {
+    double det;
+    switch (calc_method) {
+        case model::CalculationMethod::Library:
+            CalculateDeterminant(std::vector<bool>(matrix_.size(), true), 0U, det);
+            break;
+        case model::CalculationMethod::LUDecomposition: {
+            auto const& [l, u] = LUDecomposition();
+            det = 1;
+            for (std::size_t i = 0; i != matrix_.size(); ++i) {
+                det *= (*l.get())[i][i];
+            }
+            break;
+        }
+        case model::CalculationMethod::QRDecomposition: {
+            auto const& [q, r] = QRDecomposition();
+            det = 1;
+            for (std::size_t i = 0; i != matrix_.size(); ++i) {
+                det *= (*r.get())[i][i];
+            }
+            break;
+        }
+        default:
+            break;
     }
 
-    auto const& [l, u] = LUDecomposition();
-    double det = 1;
-    for (std::size_t i = 0; i != matrix_.size(); ++i) {
-        det *= (*l.get())[i][i];
-    }
     return det;
 }
 
@@ -55,17 +69,18 @@ double Matrix::Norm() const {
     return norm;
 }
 
-Matrix Matrix::Inverse(bool use_lu) const {
-    if (!use_lu) return util::CalculateInverseMatrix(matrix_);
+Matrix Matrix::Inverse(SolveMethod calc_method) const {
+    if (calc_method == model::SolveMethod::Library) {
+        return util::CalculateInverseMatrix(matrix_);
+    }
 
     Matrix inverse{matrix_.size()};
     std::vector<double> vector(matrix_.size());
 
     for (std::size_t i = 0; i != matrix_.size(); ++i) {
-        auto const& [l, u] = LUDecomposition();
         if (i != 0) vector[i - 1] = 0;
         vector[i] = 1;
-        std::vector<double> solution = SolveSystem(vector);
+        std::vector<double> solution = SolveSystem(vector, calc_method);
         for (std::size_t j = 0; j != matrix_.size(); ++j) {
             inverse[j][i] = solution[j];
         }

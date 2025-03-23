@@ -64,8 +64,8 @@ std::vector<double> Matrix::SolveSystem(std::vector<double> const& vector,
         }
         case model::SolveMethod::LUDecomposition: {
             auto const& [l, u] = LUDecomposition();
-            std::vector<double> first_solution = l.SolveLowerTriangularSystem(vector);
-            solution = u.SolveUpperTriangularSystem(first_solution);
+            std::vector<double> first_solution = l->SolveLowerTriangularSystem(vector);
+            solution = u->SolveUpperTriangularSystem(first_solution);
             break;
         }
         case model::SolveMethod::QRDecomposition:
@@ -122,7 +122,9 @@ std::pair<Matrix, std::vector<double>> Matrix::GaussElimination(
     return {std::move(matrix_copy), std::move(vector_copy)};
 }
 
-std::pair<Matrix, Matrix> Matrix::LUDecomposition() const {
+std::pair<std::shared_ptr<Matrix>, std::shared_ptr<Matrix>> Matrix::LUDecomposition() const {
+    if (l_cache_ != nullptr && u_cache_ != nullptr) return {l_cache_, u_cache_};
+
     Matrix l{matrix_.size()};
     Matrix u{matrix_.size()};
 
@@ -146,7 +148,8 @@ std::pair<Matrix, Matrix> Matrix::LUDecomposition() const {
             u[i][j] /= l[i][i];
         }
     }
-    return {std::move(l), std::move(u)};
+
+    return {std::make_shared<Matrix>(l), std::make_shared<Matrix>(u)};
 }
 
 double Matrix::NormConditionNumber() const {

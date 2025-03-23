@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -29,6 +30,8 @@ private:
     };
 
     std::vector<std::vector<double>> matrix_;
+    std::shared_ptr<Matrix> l_cache_;
+    std::shared_ptr<Matrix> u_cache_;
 
     void CalculateDeterminant(std::vector<bool> available_indices, unsigned depth,
                               double& result) const;
@@ -81,7 +84,7 @@ public:
                                     SolveMethod const solve_method = SolveMethod::Library) const;
     std::pair<Matrix, std::vector<double>> GaussElimination(
             std::vector<double> const& vector) const;
-    std::pair<Matrix, Matrix> LUDecomposition() const;
+    std::pair<std::shared_ptr<Matrix>, std::shared_ptr<Matrix>> LUDecomposition() const;
 
     double NormConditionNumber() const;
     double VolumeConditionNumber() const;

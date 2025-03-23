@@ -32,11 +32,14 @@ private:
     std::vector<std::vector<double>> matrix_;
     std::shared_ptr<Matrix> l_cache_;
     std::shared_ptr<Matrix> u_cache_;
+    std::shared_ptr<Matrix> q_cache_;
+    std::shared_ptr<Matrix> r_cache_;
 
     void CalculateDeterminant(std::vector<bool> available_indices, unsigned depth,
                               double& result) const;
     std::vector<double> SolveUpperTriangularSystem(std::vector<double> const& vector) const;
     std::vector<double> SolveLowerTriangularSystem(std::vector<double> const& vector) const;
+    void MultiplyByOrthogonal(std::size_t i, std::size_t j, double cosine, double sine);
 
 public:
     Matrix() = default;
@@ -80,11 +83,15 @@ public:
     double Determinant(bool use_lu = false) const;
     double Norm() const;
     Matrix Inverse(bool use_lu = false) const;
+    Matrix Transpose() const;
+    void SelfTranspose();
+    std::vector<double> MultiplyByVector(std::vector<double> const& vector) const;
     std::vector<double> SolveSystem(std::vector<double> const& vector,
                                     SolveMethod const solve_method = SolveMethod::Library) const;
     std::pair<Matrix, std::vector<double>> GaussElimination(
             std::vector<double> const& vector) const;
     std::pair<std::shared_ptr<Matrix>, std::shared_ptr<Matrix>> LUDecomposition() const;
+    std::pair<std::shared_ptr<Matrix>, std::shared_ptr<Matrix>> QRDecomposition() const;
 
     double NormConditionNumber() const;
     double VolumeConditionNumber() const;

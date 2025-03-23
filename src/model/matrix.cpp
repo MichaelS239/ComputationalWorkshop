@@ -73,6 +73,34 @@ Matrix Matrix::Inverse(bool use_lu) const {
     return inverse;
 }
 
+Matrix Matrix::Transpose() const {
+    Matrix matrix{matrix_};
+    matrix.SelfTranspose();
+    return matrix;
+}
+
+void Matrix::SelfTranspose() {
+    for (std::size_t i = 0; i != matrix_.size(); ++i) {
+        for (std::size_t j = 0; j != i; ++j) {
+            std::swap(matrix_[i][j], matrix_[j][i]);
+        }
+    }
+}
+
+std::vector<double> Matrix::MultiplyByVector(std::vector<double> const& vector) const {
+    if (vector.size() != matrix_.size())
+        throw std::runtime_error("Error: sizes of matrix and vector are different");
+
+    std::vector<double> result(vector.size());
+    for (std::size_t i = 0; i != vector.size(); ++i) {
+        for (std::size_t k = 0; k != vector.size(); ++k) {
+            result[i] += matrix_[i][k] * vector[k];
+        }
+    }
+
+    return result;
+}
+
 std::vector<double> Matrix::SolveSystem(std::vector<double> const& vector,
                                         SolveMethod const solve_method) const {
     std::vector<double> solution;
@@ -92,8 +120,12 @@ std::vector<double> Matrix::SolveSystem(std::vector<double> const& vector,
             solution = u->SolveUpperTriangularSystem(first_solution);
             break;
         }
-        case model::SolveMethod::QRDecomposition:
+        case model::SolveMethod::QRDecomposition: {
+            auto const& [q, r] = QRDecomposition();
+            std::vector<double> new_vector = (q->Transpose()).MultiplyByVector(vector);
+            solution = r->SolveUpperTriangularSystem(new_vector);
             break;
+        }
         default:
             break;
     }
@@ -103,11 +135,12 @@ std::vector<double> Matrix::SolveSystem(std::vector<double> const& vector,
 
 std::vector<double> Matrix::SolveUpperTriangularSystem(std::vector<double> const& vector) const {
     std::vector<double> solution = vector;
-    for (std::size_t k = matrix_.size() - 1; k != 0; --k) {
+    for (std::size_t k = matrix_.size() - 1; k >= 0; --k) {
         solution[k] /= matrix_[k][k];
         for (std::size_t i = 0; i != k; ++i) {
             solution[i] -= solution[k] * matrix_[i][k];
         }
+        if (k == 0) break;
     }
     return solution;
 }
@@ -174,6 +207,37 @@ std::pair<std::shared_ptr<Matrix>, std::shared_ptr<Matrix>> Matrix::LUDecomposit
     }
 
     return {std::make_shared<Matrix>(l), std::make_shared<Matrix>(u)};
+}
+
+void Matrix::MultiplyByOrthogonal(std::size_t i, std::size_t j, double cosine, double sine) {
+    for (std::size_t k = 0; k != matrix_.size(); ++k) {
+        double new_i = matrix_[i][k] * cosine - matrix_[j][k] * sine;
+        double new_j = matrix_[i][k] * sine + matrix_[j][k] * cosine;
+        matrix_[i][k] = new_i;
+        matrix_[j][k] = new_j;
+    }
+}
+
+std::pair<std::shared_ptr<Matrix>, std::shared_ptr<Matrix>> Matrix::QRDecomposition() const {
+    if (q_cache_ != nullptr && r_cache_ != nullptr) return {q_cache_, r_cache_};
+
+    Matrix q = CreateDiagonal(matrix_.size(), 1);
+    Matrix r{matrix_};
+
+    for (std::size_t i = 0; i != matrix_.size(); ++i) {
+        for (std::size_t j = i + 1; j != matrix_.size(); ++j) {
+            if (r[i][i] != 0 || r[j][i] != 0) {
+                double root = std::sqrt(r[i][i] * r[i][i] + r[j][i] * r[j][i]);
+                double cosine = r[i][i] / root;
+                double sine = -r[j][i] / root;
+                r.MultiplyByOrthogonal(i, j, cosine, sine);
+                q.MultiplyByOrthogonal(i, j, cosine, sine);
+            }
+        }
+    }
+    q.SelfTranspose();
+
+    return {std::make_shared<Matrix>(q), std::make_shared<Matrix>(r)};
 }
 
 double Matrix::NormConditionNumber() const {

@@ -21,6 +21,8 @@ void Semester6Task2() {
             matrix.SolveSystem(vector, model::SolveMethod::GaussElimination);
     std::vector<double> third_solution =
             matrix.SolveSystem(vector, model::SolveMethod::LUDecomposition);
+    std::vector<double> forth_solution =
+            matrix.SolveSystem(vector, model::SolveMethod::QRDecomposition);
     for (std::size_t i = 0; i != first_solution.size(); ++i) {
         std::cout << first_solution[i] << " ";
     }
@@ -31,6 +33,10 @@ void Semester6Task2() {
     std::cout << '\n';
     for (std::size_t i = 0; i != third_solution.size(); ++i) {
         std::cout << third_solution[i] << " ";
+    }
+    std::cout << '\n';
+    for (std::size_t i = 0; i != forth_solution.size(); ++i) {
+        std::cout << forth_solution[i] << " ";
     }
     std::cout << '\n';
 

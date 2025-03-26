@@ -1,57 +1,82 @@
 #include "task2.h"
 
-#include <algorithm>
 #include <cstddef>
-#include <iomanip>
 #include <iostream>
-#include <sstream>
-#include <string>
+#include <utility>
 #include <vector>
 
 #include "model/matrix.h"
+#include "solve_system.h"
 #include "util/table.h"
+
+namespace semester6_task2 {
+void PrintSystem(model::Matrix const& matrix, std::vector<double> vector) {
+    std::cout << "Matrix:" << '\n';
+    std::cout << matrix.ToString() << '\n';
+    std::cout << "Condition number: " << matrix.NormConditionNumber() << '\n';
+
+    auto const& [l, u] = matrix.LUDecomposition();
+    std::cout << "LU decomposition:" << '\n';
+    std::cout << l->ToString() << u->ToString() << '\n';
+    std::cout << "L condition number: " << l->NormConditionNumber() << '\n';
+    std::cout << "U condition number: " << u->NormConditionNumber() << '\n';
+
+    auto const& [q, r] = matrix.QRDecomposition();
+    std::cout << "QR decomposition:" << '\n';
+    std::cout << q->ToString() << r->ToString() << '\n';
+    std::cout << "Q condition number: " << q->NormConditionNumber() << '\n';
+    std::cout << "R condition number: " << r->NormConditionNumber() << '\n';
+
+    std::vector<std::vector<double>> table = SolveSystem(matrix, vector);
+    util::PrintTable(table, {"Right-hand side", "Library solution", "Gauss elimination",
+                             "LU decomposition", "QR decomposition"});
+    std::cout << '\n';
+}
+
+}  // namespace semester6_task2
 
 namespace tasks {
 void Semester6Task2() {
     std::cout << "Direct methods for solving systems of linear equations" << '\n';
-    model::Matrix matrix = {{1, 7, 2}, {3, 5, 4}, {2, 8, 6}};
-    std::vector<double> vector = {3, 7, 2};
-    std::vector<double> first_solution = matrix.SolveSystem(vector);
-    std::vector<double> second_solution =
-            matrix.SolveSystem(vector, model::SolveMethod::GaussElimination);
-    std::vector<double> third_solution =
-            matrix.SolveSystem(vector, model::SolveMethod::LUDecomposition);
-    std::vector<double> forth_solution =
-            matrix.SolveSystem(vector, model::SolveMethod::QRDecomposition);
-    for (std::size_t i = 0; i != first_solution.size(); ++i) {
-        std::cout << first_solution[i] << " ";
-    }
-    std::cout << '\n';
-    for (std::size_t i = 0; i != second_solution.size(); ++i) {
-        std::cout << second_solution[i] << " ";
-    }
-    std::cout << '\n';
-    for (std::size_t i = 0; i != third_solution.size(); ++i) {
-        std::cout << third_solution[i] << " ";
-    }
-    std::cout << '\n';
-    for (std::size_t i = 0; i != forth_solution.size(); ++i) {
-        std::cout << forth_solution[i] << " ";
-    }
-    std::cout << '\n';
 
-    model::Matrix inv1 = matrix.Inverse();
-    model::Matrix inv2 = matrix.Inverse(model::SolveMethod::GaussElimination);
-    model::Matrix inv3 = matrix.Inverse(model::SolveMethod::LUDecomposition);
-    model::Matrix inv4 = matrix.Inverse(model::SolveMethod::QRDecomposition);
-    std::cout << inv1.ToString() << '\n';
-    std::cout << inv2.ToString() << '\n';
-    std::cout << inv3.ToString() << '\n';
-    std::cout << inv4.ToString() << '\n';
+    model::Matrix matrix1 = {{1, 7, 2}, {3, 5, 4}, {2, 8, 6}};
+    std::vector<double> vector1 = {3, 7, 2};
+    semester6_task2::PrintSystem(matrix1, std::move(vector1));
 
-    std::cout << matrix.Determinant() << '\n';
-    std::cout << matrix.Determinant(model::CalculationMethod::LUDecomposition) << '\n';
-    std::cout << matrix.Determinant(model::CalculationMethod::QRDecomposition) << '\n';
+    model::Matrix matrix2 = {{3.278164, 1.045683, -1.378574},
+                             {1.046583, 2.975937, 0.934251},
+                             {-1.378574, 0.934251, 4.836173}};
+    std::vector<double> vector2 = {-0.527466, 2.526877, 5.165441};
+    matrix2.CacheLUDecomposition();
+    matrix2.CacheQRDecomposition();
+    semester6_task2::PrintSystem(matrix2, std::move(vector2));
+
+    model::Matrix matrix3 = model::Matrix::CreateDiagonal(3, 2);
+    matrix3.CacheLUDecomposition();
+    matrix3.CacheQRDecomposition();
+    semester6_task2::PrintSystem(matrix3);
+
+    model::Matrix matrix4 = model::Matrix::CreateGilbert(3);
+    matrix4.CacheLUDecomposition();
+    matrix4.CacheQRDecomposition();
+    semester6_task2::PrintSystem(matrix4);
+
+    model::Matrix matrix5 = model::Matrix::CreateGilbert(6);
+    matrix5.CacheLUDecomposition();
+    matrix5.CacheQRDecomposition();
+    semester6_task2::PrintSystem(matrix5);
+
+    model::Matrix matrix6 = model::Matrix::CreateTridiagonal(4);
+    matrix6.CacheLUDecomposition();
+    matrix6.CacheQRDecomposition();
+    semester6_task2::PrintSystem(matrix6);
+
+    for (std::size_t i = 0; i != 5; ++i) {
+        model::Matrix matrix7 = model::Matrix::CreateRandom(5);
+        matrix7.CacheLUDecomposition();
+        matrix7.CacheQRDecomposition();
+        semester6_task2::PrintSystem(matrix7);
+    }
 }
 
 }  // namespace tasks

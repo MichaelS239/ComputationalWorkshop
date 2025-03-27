@@ -263,6 +263,57 @@ void Matrix::CacheQRDecomposition() {
     r_cache_ = r;
 }
 
+std::vector<double> Matrix::SolveSystem(std::vector<double> const& vector, double eps,
+                                        IterationMethod const solve_method) const {
+    std::vector<double> solution;
+    switch (solve_method) {
+        case model::IterationMethod::Jacobi: {
+            solution = JacobiIteration(vector, eps);
+            break;
+        }
+        case model::IterationMethod::Seidel: {
+            break;
+        }
+        default:
+            break;
+    }
+
+    return solution;
+}
+
+std::vector<double> Matrix::JacobiIteration(std::vector<double> const& vector, double eps) const {
+    Matrix b{matrix_.size()};
+    std::vector<double> c(matrix_.size());
+    for (std::size_t i = 0; i != matrix_.size(); ++i) {
+        for (std::size_t j = 0; j != matrix_.size(); ++j) {
+            if (j != i) {
+                b[i][j] = -matrix_[i][j] / matrix_[i][i];
+            }
+        }
+        c[i] = vector[i] / matrix_[i][i];
+    }
+    double norm = b.Norm();
+    double norm_coef = norm / (1 - norm);
+
+    std::vector<double> x0(matrix_.size());
+    std::vector<double> x1(matrix_.size());
+    double difference = 0;
+    std::size_t iteration_num = 0;
+
+    do {
+        ++iteration_num;
+        x0 = std::move(x1);
+        difference = 0;
+        x1 = b.MultiplyByVector(x0);
+        for (std::size_t i = 0; i != x1.size(); ++i) {
+            x1[i] += c[i];
+            difference += (x1[i] - x0[i]) * (x1[i] - x0[i]);
+        }
+    } while (std::sqrt(difference) * norm_coef >= eps);
+
+    return x1;
+}
+
 double Matrix::NormConditionNumber() const {
     double norm = Norm();
 

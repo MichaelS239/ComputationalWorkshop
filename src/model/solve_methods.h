@@ -5,4 +5,6 @@ enum class SolveMethod { Library, GaussElimination, LUDecomposition, QRDecomposi
 
 enum class CalculationMethod { Library, LUDecomposition, QRDecomposition };
 
+enum class IterationMethod { Jacobi, Seidel };
+
 }  // namespace model

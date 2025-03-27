@@ -42,6 +42,7 @@ private:
     void MultiplyByOrthogonal(std::size_t i, std::size_t j, double cosine, double sine);
 
     std::vector<double> JacobiIteration(std::vector<double> const& vector, double eps) const;
+    std::vector<double> SeidelIteration(std::vector<double> const& vector, double eps) const;
 
 public:
     Matrix() = default;

@@ -272,6 +272,7 @@ std::vector<double> Matrix::SolveSystem(std::vector<double> const& vector, doubl
             break;
         }
         case model::IterationMethod::Seidel: {
+            solution = SeidelIteration(vector, eps);
             break;
         }
         default:
@@ -310,6 +311,32 @@ std::vector<double> Matrix::JacobiIteration(std::vector<double> const& vector, d
             difference += (x1[i] - x0[i]) * (x1[i] - x0[i]);
         }
     } while (std::sqrt(difference) * norm_coef >= eps);
+
+    return x1;
+}
+
+std::vector<double> Matrix::SeidelIteration(std::vector<double> const& vector, double eps) const {
+    std::vector<double> x0(matrix_.size());
+    std::vector<double> x1(matrix_.size());
+    double difference = 0;
+    std::size_t iteration_num = 0;
+
+    do {
+        ++iteration_num;
+        x0 = std::move(x1);
+        difference = 0;
+        x1 = std::vector<double>(matrix_.size());
+        for (std::size_t i = 0; i != x1.size(); ++i) {
+            for (std::size_t j = 0; j != i; ++j) {
+                x1[i] -= matrix_[i][j] / matrix_[i][i] * x1[j];
+            }
+            for (std::size_t j = i + 1; j != matrix_.size(); ++j) {
+                x1[i] -= matrix_[i][j] / matrix_[i][i] * x0[j];
+            }
+            x1[i] += vector[i] / matrix_[i][i];
+            difference += (x1[i] - x0[i]) * (x1[i] - x0[i]);
+        }
+    } while (std::sqrt(difference) >= eps);
 
     return x1;
 }

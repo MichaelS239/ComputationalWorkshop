@@ -202,23 +202,18 @@ std::pair<std::shared_ptr<Matrix>, std::shared_ptr<Matrix>> Matrix::LUDecomposit
     Matrix u{matrix_.size()};
 
     for (std::size_t i = 0; i != matrix_.size(); ++i) {
-        l[i][0] = matrix_[i][0];
-        u[0][i] = matrix_[0][i] / l[0][0];
-    }
-
-    for (std::size_t i = 0; i != matrix_.size(); ++i) {
-        for (std::size_t j = i; j != matrix_.size(); ++j) {
-            l[j][i] = matrix_[j][i];
-            for (std::size_t k = 0; k != i; ++k) {
-                l[j][i] -= l[j][k] * u[k][i];
-            }
-        }
         for (std::size_t j = i; j != matrix_.size(); ++j) {
             u[i][j] = matrix_[i][j];
             for (std::size_t k = 0; k != i; ++k) {
                 u[i][j] -= l[i][k] * u[k][j];
             }
-            u[i][j] /= l[i][i];
+        }
+        for (std::size_t j = i; j != matrix_.size(); ++j) {
+            l[j][i] = matrix_[j][i];
+            for (std::size_t k = 0; k != i; ++k) {
+                l[j][i] -= l[j][k] * u[k][i];
+            }
+            l[j][i] /= u[i][i];
         }
     }
 

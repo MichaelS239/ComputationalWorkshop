@@ -14,8 +14,8 @@ void PrintSystem(model::Matrix const& matrix, double eps, std::vector<double> ve
 
     std::vector<std::vector<double>> table = semester6_task3::SolveSystem(matrix, eps, vector);
 
-    util::PrintTable(table,
-                     {"Right-hand side", "LU decomposition", "Jacobi iteration", "Difference"});
+    util::PrintTable(table, {"Right-hand side", "LU decomposition", "Jacobi iteration",
+                             "Jacobi error", "Seidel iteration", "Seidel error"});
     std::cout << '\n';
 }
 

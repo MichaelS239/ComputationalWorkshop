@@ -5,6 +5,7 @@
 #include <memory>
 #include <random>
 #include <sstream>
+#include <utility>
 #include <vector>
 
 namespace model {
@@ -263,26 +264,32 @@ void Matrix::CacheQRDecomposition() {
     r_cache_ = r;
 }
 
-std::vector<double> Matrix::SolveSystem(std::vector<double> const& vector, double eps,
-                                        IterationMethod const solve_method) const {
+std::pair<std::vector<double>, std::size_t> Matrix::SolveSystem(
+        std::vector<double> const& vector, double eps, IterationMethod const solve_method) const {
     std::vector<double> solution;
+    std::size_t iter_num = 0;
     switch (solve_method) {
         case model::IterationMethod::Jacobi: {
-            solution = JacobiIteration(vector, eps);
+            auto [sol, iter] = JacobiIteration(vector, eps);
+            solution = std::move(sol);
+            iter_num = iter;
             break;
         }
         case model::IterationMethod::Seidel: {
-            solution = SeidelIteration(vector, eps);
+            auto [sol, iter] = SeidelIteration(vector, eps);
+            solution = std::move(sol);
+            iter_num = iter;
             break;
         }
         default:
             break;
     }
 
-    return solution;
+    return {std::move(solution), iter_num};
 }
 
-std::vector<double> Matrix::JacobiIteration(std::vector<double> const& vector, double eps) const {
+std::pair<std::vector<double>, std::size_t> Matrix::JacobiIteration(
+        std::vector<double> const& vector, double eps) const {
     Matrix b{matrix_.size()};
     std::vector<double> c(matrix_.size());
     for (std::size_t i = 0; i != matrix_.size(); ++i) {
@@ -312,10 +319,11 @@ std::vector<double> Matrix::JacobiIteration(std::vector<double> const& vector, d
         }
     } while (std::sqrt(difference) * norm_coef >= eps);
 
-    return x1;
+    return {std::move(x1), iteration_num};
 }
 
-std::vector<double> Matrix::SeidelIteration(std::vector<double> const& vector, double eps) const {
+std::pair<std::vector<double>, std::size_t> Matrix::SeidelIteration(
+        std::vector<double> const& vector, double eps) const {
     std::vector<double> x0(matrix_.size());
     std::vector<double> x1(matrix_.size());
     double difference = 0;
@@ -338,7 +346,7 @@ std::vector<double> Matrix::SeidelIteration(std::vector<double> const& vector, d
         }
     } while (std::sqrt(difference) >= eps);
 
-    return x1;
+    return {std::move(x1), iteration_num};
 }
 
 double Matrix::NormConditionNumber() const {

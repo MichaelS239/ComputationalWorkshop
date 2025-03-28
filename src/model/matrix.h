@@ -45,6 +45,9 @@ private:
                                                                 double eps) const;
     std::pair<std::vector<double>, std::size_t> SeidelIteration(std::vector<double> const& vector,
                                                                 double eps) const;
+    void MakeSymmetric();
+    static Matrix CreateRandomDiagonalDominant(bool is_symmetric, std::size_t n, double lower_bound,
+                                               double upper_bound);
 
 public:
     Matrix() = default;
@@ -112,6 +115,12 @@ public:
     static Matrix CreateDiagonal(std::size_t n, double k);
     static Matrix CreateGilbert(std::size_t n);
     static Matrix CreateTridiagonal(std::size_t n);
+    static Matrix CreateRandomDiagonalDominant(std::size_t n, double lower_bound = -10,
+                                               double upper_bound = 10);
+    static Matrix CreateRandomSymmetric(std::size_t n, double lower_bound = -10,
+                                        double upper_bound = 10);
+    static Matrix CreateRandomSymmetricDiagonalDominant(std::size_t n, double lower_bound = -10,
+                                                        double upper_bound = 10);
     static Matrix CreateRandom(std::size_t n, double lower_bound = -10, double upper_bound = 10);
 };
 

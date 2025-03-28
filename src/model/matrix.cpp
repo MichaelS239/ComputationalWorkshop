@@ -430,7 +430,7 @@ std::string Matrix::ToString() const {
 }
 
 Matrix Matrix::CreateDiagonal(std::size_t n, double k) {
-    std::vector<std::vector<double>> matrix(n, std::vector<double>(n));
+    Matrix matrix(n);
     for (std::size_t i = 0; i != n; ++i) {
         matrix[i][i] = k;
     }
@@ -438,7 +438,7 @@ Matrix Matrix::CreateDiagonal(std::size_t n, double k) {
 }
 
 Matrix Matrix::CreateGilbert(std::size_t n) {
-    std::vector<std::vector<double>> matrix(n, std::vector<double>(n));
+    Matrix matrix(n);
     for (std::size_t i = 0; i != n; ++i) {
         for (std::size_t j = 0; j != n; ++j) {
             matrix[i][j] = 1 / (double)(i + j + 1);
@@ -448,7 +448,7 @@ Matrix Matrix::CreateGilbert(std::size_t n) {
 }
 
 Matrix Matrix::CreateTridiagonal(std::size_t n) {
-    std::vector<std::vector<double>> matrix(n, std::vector<double>(n));
+    Matrix matrix(n);
     for (std::size_t i = 0; i != n; ++i) {
         for (std::size_t j = 0; j != n; ++j) {
             if (i == j) {
@@ -461,8 +461,80 @@ Matrix Matrix::CreateTridiagonal(std::size_t n) {
     return matrix;
 }
 
+void Matrix::MakeSymmetric() {
+    for (std::size_t i = 0; i != matrix_.size(); ++i) {
+        for (std::size_t j = i + 1; j != matrix_.size(); ++j) {
+            matrix_[i][j] = matrix_[j][i];
+        }
+    }
+}
+
+Matrix Matrix::CreateRandomDiagonalDominant(bool is_symmetric, std::size_t n, double lower_bound,
+                                            double upper_bound) {
+    Matrix matrix(n);
+    std::random_device r;
+    std::default_random_engine re(r());
+    std::uniform_real_distribution<double> unif(lower_bound, upper_bound);
+    std::mt19937 rng(r());
+    std::uniform_int_distribution<std::mt19937::result_type> dist(0, n * n - 1);
+
+    for (std::size_t i = 0; i != n; ++i) {
+        matrix[i][i] = unif(re);
+    }
+
+    for (std::size_t index = 0; index != n; ++index) {
+        std::size_t i = 0;
+        std::size_t j = 0;
+        std::size_t num = 0;
+        while (i == j || matrix[i][j] != 0) {
+            num = dist(rng);
+            i = num / n;
+            j = num % n;
+        }
+        double value = 0;
+        double sum = 0;
+        for (std::size_t k = 0; k != n; ++k) {
+            if (k != i) sum += std::abs(matrix[i][k]);
+        }
+        double gap = std::abs(matrix[i][i]) - sum;
+
+        if (is_symmetric) {
+            double second_sum = 0;
+            for (std::size_t k = 0; k != n; ++k) {
+                if (k != j) second_sum += std::abs(matrix[j][k]);
+            }
+            double second_gap = std::abs(matrix[j][j]) - second_sum;
+            gap = std::min(gap, second_gap);
+        }
+
+        std::uniform_real_distribution<double> unif(-std::abs(gap) / 2, std::abs(gap) / 2);
+        value = unif(re);
+        matrix[i][j] = value;
+        if (is_symmetric) {
+            matrix[j][i] = value;
+        }
+    }
+
+    return matrix;
+}
+
+Matrix Matrix::CreateRandomDiagonalDominant(std::size_t n, double lower_bound, double upper_bound) {
+    return CreateRandomDiagonalDominant(false, n, lower_bound, upper_bound);
+}
+
+Matrix Matrix::CreateRandomSymmetric(std::size_t n, double lower_bound, double upper_bound) {
+    Matrix matrix = CreateRandom(n, lower_bound, upper_bound);
+    matrix.MakeSymmetric();
+    return matrix;
+}
+
+Matrix Matrix::CreateRandomSymmetricDiagonalDominant(std::size_t n, double lower_bound,
+                                                     double upper_bound) {
+    return CreateRandomDiagonalDominant(true, n, lower_bound, upper_bound);
+}
+
 Matrix Matrix::CreateRandom(std::size_t n, double lower_bound, double upper_bound) {
-    std::vector<std::vector<double>> matrix(n, std::vector<double>(n));
+    Matrix matrix(n);
 
     std::random_device r;
     std::default_random_engine re(r());

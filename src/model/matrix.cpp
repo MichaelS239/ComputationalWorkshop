@@ -300,8 +300,6 @@ std::pair<std::vector<double>, std::size_t> Matrix::JacobiIteration(
         }
         c[i] = vector[i] / matrix_[i][i];
     }
-    double norm = b.Norm();
-    double norm_coef = norm / (1 - norm);
 
     std::vector<double> x0(matrix_.size());
     std::vector<double> x1(matrix_.size());
@@ -317,7 +315,7 @@ std::pair<std::vector<double>, std::size_t> Matrix::JacobiIteration(
             x1[i] += c[i];
             difference += (x1[i] - x0[i]) * (x1[i] - x0[i]);
         }
-    } while (std::sqrt(difference) * norm_coef >= eps);
+    } while (std::sqrt(difference) >= eps);
 
     return {std::move(x1), iteration_num};
 }

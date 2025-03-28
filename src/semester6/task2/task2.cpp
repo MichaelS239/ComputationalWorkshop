@@ -11,23 +11,34 @@
 
 namespace semester6_task2 {
 void PrintSystem(model::Matrix const& matrix, std::vector<double> vector) {
-    std::cout << "Matrix:" << '\n';
-    std::cout << matrix.ToString() << '\n';
+    if (matrix.Size() <= 10) {
+        std::cout << "Matrix:" << '\n';
+        std::cout << matrix.ToString() << '\n';
+    } else {
+        std::cout << "Matrix of size " << matrix.Size() << ":" << '\n';
+    }
     std::cout << "Condition number: " << matrix.NormConditionNumber() << '\n';
 
     auto const& [l, u] = matrix.LUDecomposition();
-    std::cout << "LU decomposition:" << '\n';
-    std::cout << l->ToString() << u->ToString() << '\n';
+    if (matrix.Size() <= 10) {
+        std::cout << "LU decomposition:" << '\n';
+        std::cout << l->ToString() << u->ToString() << '\n';
+    }
     std::cout << "L condition number: " << l->NormConditionNumber() << '\n';
     std::cout << "U condition number: " << u->NormConditionNumber() << '\n';
 
     auto const& [q, r] = matrix.QRDecomposition();
-    std::cout << "QR decomposition:" << '\n';
-    std::cout << q->ToString() << r->ToString() << '\n';
+    if (matrix.Size() <= 10) {
+        std::cout << "QR decomposition:" << '\n';
+        std::cout << q->ToString() << r->ToString() << '\n';
+    }
     std::cout << "Q condition number: " << q->NormConditionNumber() << '\n';
     std::cout << "R condition number: " << r->NormConditionNumber() << '\n';
 
     std::vector<std::vector<double>> table = SolveSystem(matrix, vector);
+    if (matrix.Size() > 10) {
+        std::cout << "First 10 rows of the table:" << '\n';
+    }
     util::PrintTable(table, {"Right-hand side", "Library solution", "Gauss elimination",
                              "LU decomposition", "QR decomposition"});
     std::cout << '\n';

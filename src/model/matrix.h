@@ -41,6 +41,14 @@ private:
     std::vector<double> SolveLowerTriangularSystem(std::vector<double> const& vector) const;
     void MultiplyByOrthogonal(std::size_t i, std::size_t j, double cosine, double sine);
 
+    std::pair<std::vector<double>, std::size_t> JacobiIteration(std::vector<double> const& vector,
+                                                                double eps) const;
+    std::pair<std::vector<double>, std::size_t> SeidelIteration(std::vector<double> const& vector,
+                                                                double eps) const;
+    void MakeSymmetric();
+    static Matrix CreateRandomDiagonalDominant(bool is_symmetric, std::size_t n, double lower_bound,
+                                               double upper_bound);
+
 public:
     Matrix() = default;
 
@@ -88,6 +96,9 @@ public:
     std::vector<double> MultiplyByVector(std::vector<double> const& vector) const;
     std::vector<double> SolveSystem(std::vector<double> const& vector,
                                     SolveMethod const solve_method = SolveMethod::Library) const;
+    std::pair<std::vector<double>, std::size_t> SolveSystem(
+            std::vector<double> const& vector, double eps,
+            IterationMethod const solve_method = IterationMethod::Jacobi) const;
     std::pair<Matrix, std::vector<double>> GaussElimination(
             std::vector<double> const& vector) const;
     std::pair<std::shared_ptr<Matrix>, std::shared_ptr<Matrix>> LUDecomposition() const;
@@ -104,6 +115,12 @@ public:
     static Matrix CreateDiagonal(std::size_t n, double k);
     static Matrix CreateGilbert(std::size_t n);
     static Matrix CreateTridiagonal(std::size_t n);
+    static Matrix CreateRandomDiagonalDominant(std::size_t n, double lower_bound = -10,
+                                               double upper_bound = 10);
+    static Matrix CreateRandomSymmetric(std::size_t n, double lower_bound = -10,
+                                        double upper_bound = 10);
+    static Matrix CreateRandomSymmetricDiagonalDominant(std::size_t n, double lower_bound = -10,
+                                                        double upper_bound = 10);
     static Matrix CreateRandom(std::size_t n, double lower_bound = -10, double upper_bound = 10);
 };
 

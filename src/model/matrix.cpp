@@ -5,6 +5,7 @@
 #include <memory>
 #include <random>
 #include <sstream>
+#include <utility>
 #include <vector>
 
 namespace model {
@@ -263,6 +264,89 @@ void Matrix::CacheQRDecomposition() {
     r_cache_ = r;
 }
 
+std::pair<std::vector<double>, std::size_t> Matrix::SolveSystem(
+        std::vector<double> const& vector, double eps, IterationMethod const solve_method) const {
+    std::vector<double> solution;
+    std::size_t iter_num = 0;
+    switch (solve_method) {
+        case model::IterationMethod::Jacobi: {
+            auto [sol, iter] = JacobiIteration(vector, eps);
+            solution = std::move(sol);
+            iter_num = iter;
+            break;
+        }
+        case model::IterationMethod::Seidel: {
+            auto [sol, iter] = SeidelIteration(vector, eps);
+            solution = std::move(sol);
+            iter_num = iter;
+            break;
+        }
+        default:
+            break;
+    }
+
+    return {std::move(solution), iter_num};
+}
+
+std::pair<std::vector<double>, std::size_t> Matrix::JacobiIteration(
+        std::vector<double> const& vector, double eps) const {
+    Matrix b{matrix_.size()};
+    std::vector<double> c(matrix_.size());
+    for (std::size_t i = 0; i != matrix_.size(); ++i) {
+        for (std::size_t j = 0; j != matrix_.size(); ++j) {
+            if (j != i) {
+                b[i][j] = -matrix_[i][j] / matrix_[i][i];
+            }
+        }
+        c[i] = vector[i] / matrix_[i][i];
+    }
+
+    std::vector<double> x0(matrix_.size());
+    std::vector<double> x1(matrix_.size());
+    double difference = 0;
+    std::size_t iteration_num = 0;
+
+    do {
+        ++iteration_num;
+        x0 = std::move(x1);
+        difference = 0;
+        x1 = b.MultiplyByVector(x0);
+        for (std::size_t i = 0; i != x1.size(); ++i) {
+            x1[i] += c[i];
+            difference += (x1[i] - x0[i]) * (x1[i] - x0[i]);
+        }
+    } while (std::sqrt(difference) >= eps);
+
+    return {std::move(x1), iteration_num};
+}
+
+std::pair<std::vector<double>, std::size_t> Matrix::SeidelIteration(
+        std::vector<double> const& vector, double eps) const {
+    std::vector<double> x0(matrix_.size());
+    std::vector<double> x1(matrix_.size());
+    double difference = 0;
+    std::size_t iteration_num = 0;
+
+    do {
+        ++iteration_num;
+        x0 = std::move(x1);
+        difference = 0;
+        x1 = std::vector<double>(matrix_.size());
+        for (std::size_t i = 0; i != x1.size(); ++i) {
+            for (std::size_t j = 0; j != i; ++j) {
+                x1[i] -= matrix_[i][j] / matrix_[i][i] * x1[j];
+            }
+            for (std::size_t j = i + 1; j != matrix_.size(); ++j) {
+                x1[i] -= matrix_[i][j] / matrix_[i][i] * x0[j];
+            }
+            x1[i] += vector[i] / matrix_[i][i];
+            difference += (x1[i] - x0[i]) * (x1[i] - x0[i]);
+        }
+    } while (std::sqrt(difference) >= eps);
+
+    return {std::move(x1), iteration_num};
+}
+
 double Matrix::NormConditionNumber() const {
     double norm = Norm();
 
@@ -344,7 +428,7 @@ std::string Matrix::ToString() const {
 }
 
 Matrix Matrix::CreateDiagonal(std::size_t n, double k) {
-    std::vector<std::vector<double>> matrix(n, std::vector<double>(n));
+    Matrix matrix(n);
     for (std::size_t i = 0; i != n; ++i) {
         matrix[i][i] = k;
     }
@@ -352,7 +436,7 @@ Matrix Matrix::CreateDiagonal(std::size_t n, double k) {
 }
 
 Matrix Matrix::CreateGilbert(std::size_t n) {
-    std::vector<std::vector<double>> matrix(n, std::vector<double>(n));
+    Matrix matrix(n);
     for (std::size_t i = 0; i != n; ++i) {
         for (std::size_t j = 0; j != n; ++j) {
             matrix[i][j] = 1 / (double)(i + j + 1);
@@ -362,7 +446,7 @@ Matrix Matrix::CreateGilbert(std::size_t n) {
 }
 
 Matrix Matrix::CreateTridiagonal(std::size_t n) {
-    std::vector<std::vector<double>> matrix(n, std::vector<double>(n));
+    Matrix matrix(n);
     for (std::size_t i = 0; i != n; ++i) {
         for (std::size_t j = 0; j != n; ++j) {
             if (i == j) {
@@ -375,8 +459,80 @@ Matrix Matrix::CreateTridiagonal(std::size_t n) {
     return matrix;
 }
 
+void Matrix::MakeSymmetric() {
+    for (std::size_t i = 0; i != matrix_.size(); ++i) {
+        for (std::size_t j = i + 1; j != matrix_.size(); ++j) {
+            matrix_[i][j] = matrix_[j][i];
+        }
+    }
+}
+
+Matrix Matrix::CreateRandomDiagonalDominant(bool is_symmetric, std::size_t n, double lower_bound,
+                                            double upper_bound) {
+    Matrix matrix(n);
+    std::random_device r;
+    std::default_random_engine re(r());
+    std::uniform_real_distribution<double> unif(lower_bound, upper_bound);
+    std::mt19937 rng(r());
+    std::uniform_int_distribution<std::mt19937::result_type> dist(0, n * n - 1);
+
+    for (std::size_t i = 0; i != n; ++i) {
+        matrix[i][i] = unif(re);
+    }
+
+    for (std::size_t index = 0; index != n; ++index) {
+        std::size_t i = 0;
+        std::size_t j = 0;
+        std::size_t num = 0;
+        while (i == j || matrix[i][j] != 0) {
+            num = dist(rng);
+            i = num / n;
+            j = num % n;
+        }
+        double value = 0;
+        double sum = 0;
+        for (std::size_t k = 0; k != n; ++k) {
+            if (k != i) sum += std::abs(matrix[i][k]);
+        }
+        double gap = std::abs(matrix[i][i]) - sum;
+
+        if (is_symmetric) {
+            double second_sum = 0;
+            for (std::size_t k = 0; k != n; ++k) {
+                if (k != j) second_sum += std::abs(matrix[j][k]);
+            }
+            double second_gap = std::abs(matrix[j][j]) - second_sum;
+            gap = std::min(gap, second_gap);
+        }
+
+        std::uniform_real_distribution<double> unif(-std::abs(gap) / 2, std::abs(gap) / 2);
+        value = unif(re);
+        matrix[i][j] = value;
+        if (is_symmetric) {
+            matrix[j][i] = value;
+        }
+    }
+
+    return matrix;
+}
+
+Matrix Matrix::CreateRandomDiagonalDominant(std::size_t n, double lower_bound, double upper_bound) {
+    return CreateRandomDiagonalDominant(false, n, lower_bound, upper_bound);
+}
+
+Matrix Matrix::CreateRandomSymmetric(std::size_t n, double lower_bound, double upper_bound) {
+    Matrix matrix = CreateRandom(n, lower_bound, upper_bound);
+    matrix.MakeSymmetric();
+    return matrix;
+}
+
+Matrix Matrix::CreateRandomSymmetricDiagonalDominant(std::size_t n, double lower_bound,
+                                                     double upper_bound) {
+    return CreateRandomDiagonalDominant(true, n, lower_bound, upper_bound);
+}
+
 Matrix Matrix::CreateRandom(std::size_t n, double lower_bound, double upper_bound) {
-    std::vector<std::vector<double>> matrix(n, std::vector<double>(n));
+    Matrix matrix(n);
 
     std::random_device r;
     std::default_random_engine re(r());

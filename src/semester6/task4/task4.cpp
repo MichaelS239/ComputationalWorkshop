@@ -4,7 +4,7 @@
 #include <iostream>
 #include <vector>
 
-#include "check_eigenvector.h"
+#include "calculate_eigenvector.h"
 #include "model/matrix.h"
 #include "util/table.h"
 
@@ -20,11 +20,23 @@ void PrintEigen(model::Matrix const& matrix, std::vector<double> const& eps) {
     for (std::size_t k = 0; k != eps.size(); ++k) {
         std::cout << "Accuracy: " << eps[k] << '\n';
 
-        auto const& [eigen_pair, iter_num] = matrix.MaxEigenvalue(eps[k]);
-        std::cout << "Number of iterations: " << iter_num << '\n';
-        std::cout << "Eigenvalue: " << eigen_pair.first << '\n';
-        std::vector<std::vector<double>> table = CheckEigenvector(matrix, eigen_pair.second);
-        util::PrintTable(table, {"Eigenvector (x)", "A * x", "(A * x) / x"});
+        EigenInfo eigen_info = CalculateEigenvector(matrix, eps[k]);
+
+        std::cout << "Power method:" << '\n';
+        std::cout << '\n';
+        std::cout << "Number of iterations of power method: " << eigen_info.power_iter_num << '\n';
+        std::cout << "Eigenvalue of power method: " << eigen_info.power_eigenvalue << '\n';
+        std::cout << "Check of eigenvector of power method:" << '\n';
+        util::PrintTable(eigen_info.power_table, {"Eigenvector (x)", "A * x", "(A * x) / x"});
+        std::cout << '\n';
+        std::cout << "Scalar product method:" << '\n';
+        std::cout << "Number of iterations of scalar product method: " << eigen_info.scalar_iter_num
+                  << '\n';
+        std::cout << "Eigenvalue of scalar product method: " << eigen_info.scalar_eigenvalue
+                  << '\n';
+        std::cout << "Check of eigenvector of scalar product method:" << '\n';
+        util::PrintTable(eigen_info.scalar_table, {"Eigenvector (x)", "A * x", "(A * x) / x"});
+        std::cout << '\n';
     }
 }
 

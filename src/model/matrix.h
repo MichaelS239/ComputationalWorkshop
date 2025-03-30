@@ -28,6 +28,12 @@ private:
         }
     };
 
+    struct EigenInfo {
+        double eigenvalue;
+        std::vector<double> eigenvector;
+        std::size_t iteration_num;
+    };
+
     std::vector<std::vector<double>> matrix_;
     std::shared_ptr<Matrix> l_cache_;
     std::shared_ptr<Matrix> u_cache_;
@@ -47,6 +53,8 @@ private:
     void MakeSymmetric();
     static Matrix CreateRandomDiagonalDominant(bool is_symmetric, std::size_t n, double lower_bound,
                                                double upper_bound);
+    EigenInfo PowerMethod(double eps) const;
+    EigenInfo ScalarProductMethod(double eps) const;
 
 public:
     Matrix() = default;
@@ -109,7 +117,8 @@ public:
     double VolumeConditionNumber() const;
     double AngleConditionNumber() const;
 
-    std::pair<std::pair<double, std::vector<double>>, std::size_t> MaxEigenvalue(double eps) const;
+    EigenInfo MaxEigenvalue(
+            double eps, EigenvalueMethod const eigenvalue_method = EigenvalueMethod::Power) const;
 
     std::string ToString() const;
 

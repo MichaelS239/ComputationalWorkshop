@@ -389,17 +389,18 @@ double Matrix::AngleConditionNumber() const {
     return result;
 }
 
-std::pair<std::pair<double, std::vector<double>>, std::size_t> Matrix::MaxEigenvalue(
-        double eps) const {
+Matrix::EigenInfo Matrix::PowerMethod(double eps) const {
     std::vector<double> x0(matrix_.size(), 1);
     std::vector<double> x1(matrix_.size(), 1);
 
     double diff = 0;
     double eigenvalue = 0;
+    double old_eigenvalue = 0;
     std::size_t iteration_num = 0;
     do {
         ++iteration_num;
         x0 = std::move(x1);
+        old_eigenvalue = eigenvalue;
         x1 = MultiplyByVector(x0);
         eigenvalue = util::ScalarProduct(x1, x0) / util::ScalarProduct(x0, x0);
         double diff_numerator = 0;
@@ -414,7 +415,63 @@ std::pair<std::pair<double, std::vector<double>>, std::size_t> Matrix::MaxEigenv
 
     util::Normalize(x1);
 
-    return {{eigenvalue, std::move(x1)}, iteration_num};
+    return {eigenvalue, std::move(x1), iteration_num};
+}
+
+Matrix::EigenInfo Matrix::ScalarProductMethod(double eps) const {
+    model::Matrix transposed_matrix = Transpose();
+    std::vector<double> x0(matrix_.size(), 1);
+    std::vector<double> x1(matrix_.size(), 1);
+    std::vector<double> y0(matrix_.size(), 1);
+    std::vector<double> y1(matrix_.size(), 1);
+
+    double diff = 0;
+    double eigenvalue = 0;
+    double old_eigenvalue = 0;
+    std::size_t iteration_num = 0;
+    do {
+        ++iteration_num;
+        x0 = std::move(x1);
+        y0 = std::move(y1);
+        old_eigenvalue = eigenvalue;
+        x1 = MultiplyByVector(x0);
+        y1 = transposed_matrix.MultiplyByVector(y0);
+        eigenvalue = util::ScalarProduct(x1, y1) / util::ScalarProduct(x0, y1);
+        double diff_numerator = 0;
+        for (std::size_t i = 0; i != matrix_.size(); ++i) {
+            diff_numerator += (x1[i] - eigenvalue * x0[i]) * (x1[i] - eigenvalue * x0[i]);
+        }
+        diff = std::sqrt(diff_numerator) / util::Norm(x0);
+        if (iteration_num % 10 == 0) {
+            util::Normalize(x1);
+            util::Normalize(y1);
+        }
+    } while (diff >= eps);
+
+    util::Normalize(x1);
+
+    return {eigenvalue, std::move(x1), iteration_num};
+}
+
+Matrix::EigenInfo Matrix::MaxEigenvalue(double eps,
+                                        EigenvalueMethod const eigenvalue_method) const {
+    EigenInfo eigen_info;
+    switch (eigenvalue_method) {
+        case model::EigenvalueMethod::Power: {
+            auto eigen = PowerMethod(eps);
+            eigen_info = std::move(eigen);
+            break;
+        }
+        case model::EigenvalueMethod::ScalarProduct: {
+            auto eigen = ScalarProductMethod(eps);
+            eigen_info = std::move(eigen);
+            break;
+        }
+        default:
+            break;
+    }
+
+    return eigen_info;
 }
 
 std::string Matrix::ToString() const {

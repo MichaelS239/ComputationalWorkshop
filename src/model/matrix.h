@@ -8,7 +8,6 @@
 #include <vector>
 
 #include "model/solve_methods.h"
-#include "util/matrix_util.h"
 
 namespace model {
 class Matrix {
@@ -109,6 +108,8 @@ public:
     double NormConditionNumber() const;
     double VolumeConditionNumber() const;
     double AngleConditionNumber() const;
+
+    std::pair<std::pair<double, std::vector<double>>, std::size_t> MaxEigenvalue(double eps) const;
 
     std::string ToString() const;
 

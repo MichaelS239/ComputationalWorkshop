@@ -8,6 +8,9 @@
 #include <utility>
 #include <vector>
 
+#include "util/matrix_util.h"
+#include "util/vector_util.h"
+
 namespace model {
 void Matrix::CalculateDeterminant(std::vector<bool> available_indices, unsigned depth,
                                   double& result) const {
@@ -384,6 +387,34 @@ double Matrix::AngleConditionNumber() const {
     }
 
     return result;
+}
+
+std::pair<std::pair<double, std::vector<double>>, std::size_t> Matrix::MaxEigenvalue(
+        double eps) const {
+    std::vector<double> x0(matrix_.size(), 1);
+    std::vector<double> x1(matrix_.size(), 1);
+
+    double diff = 0;
+    double eigenvalue = 0;
+    std::size_t iteration_num = 0;
+    do {
+        ++iteration_num;
+        x0 = std::move(x1);
+        x1 = MultiplyByVector(x0);
+        eigenvalue = util::ScalarProduct(x1, x0) / util::ScalarProduct(x0, x0);
+        double diff_numerator = 0;
+        for (std::size_t i = 0; i != matrix_.size(); ++i) {
+            diff_numerator += (x1[i] - eigenvalue * x0[i]) * (x1[i] - eigenvalue * x0[i]);
+        }
+        diff = std::sqrt(diff_numerator) / util::Norm(x0);
+        if (iteration_num % 10 == 0) {
+            util::Normalize(x1);
+        }
+    } while (diff >= eps);
+
+    util::Normalize(x1);
+
+    return {{eigenvalue, std::move(x1)}, iteration_num};
 }
 
 std::string Matrix::ToString() const {

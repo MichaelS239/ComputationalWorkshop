@@ -117,7 +117,9 @@ public:
     double VolumeConditionNumber() const;
     double AngleConditionNumber() const;
 
-    EigenInfo MaxEigenvalue(
+    EigenInfo MaxAbsoluteEigenvalue(
+            double eps, EigenvalueMethod const eigenvalue_method = EigenvalueMethod::Power) const;
+    Matrix::EigenInfo MinAbsoluteEigenvalue(
             double eps, EigenvalueMethod const eigenvalue_method = EigenvalueMethod::Power) const;
 
     std::string ToString() const;

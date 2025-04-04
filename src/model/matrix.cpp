@@ -453,8 +453,8 @@ Matrix::EigenInfo Matrix::ScalarProductMethod(double eps) const {
     return {eigenvalue, std::move(x1), iteration_num};
 }
 
-Matrix::EigenInfo Matrix::MaxEigenvalue(double eps,
-                                        EigenvalueMethod const eigenvalue_method) const {
+Matrix::EigenInfo Matrix::MaxAbsoluteEigenvalue(double eps,
+                                                EigenvalueMethod const eigenvalue_method) const {
     EigenInfo eigen_info;
     switch (eigenvalue_method) {
         case model::EigenvalueMethod::Power: {
@@ -472,6 +472,14 @@ Matrix::EigenInfo Matrix::MaxEigenvalue(double eps,
     }
 
     return eigen_info;
+}
+
+Matrix::EigenInfo Matrix::MinAbsoluteEigenvalue(double eps,
+                                                EigenvalueMethod const eigenvalue_method) const {
+    Matrix inv = Inverse();
+    Matrix::EigenInfo inv_info = inv.MaxAbsoluteEigenvalue(eps, eigenvalue_method);
+    inv_info.eigenvalue = 1 / inv_info.eigenvalue;
+    return inv_info;
 }
 
 std::string Matrix::ToString() const {

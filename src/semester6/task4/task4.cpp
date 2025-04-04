@@ -26,16 +26,20 @@ void PrintEigen(model::Matrix const& matrix, std::vector<double> const& eps) {
         std::cout << "Power method:" << '\n';
         std::cout << '\n';
         std::cout << "Number of iterations of power method: " << eigen_info.power_iter_num << '\n';
-        std::cout << "Eigenvalue of power method: " << std::setprecision(15)
+        std::cout << "Maximal absolute eigenvalue of power method: " << std::setprecision(15)
                   << eigen_info.power_eigenvalue << '\n';
+        std::cout << "Minimal absolute eigenvalue of power method: " << std::setprecision(15)
+                  << eigen_info.power_min_eigenvalue << '\n';
         std::cout << "Check of eigenvector of power method:" << '\n';
         util::PrintTable(eigen_info.power_table, {"Eigenvector (x)", "A * x", "(A * x) / x"});
         std::cout << '\n';
         std::cout << "Scalar product method:" << '\n';
         std::cout << "Number of iterations of scalar product method: " << eigen_info.scalar_iter_num
                   << '\n';
-        std::cout << "Eigenvalue of scalar product method: " << std::setprecision(15)
-                  << eigen_info.scalar_eigenvalue << '\n';
+        std::cout << "Maximal absolute eigenvalue of scalar product method: "
+                  << std::setprecision(15) << eigen_info.scalar_eigenvalue << '\n';
+        std::cout << "Minimal absolute eigenvalue of scalar product method: "
+                  << std::setprecision(15) << eigen_info.scalar_min_eigenvalue << '\n';
         std::cout << "Check of eigenvector of scalar product method:" << '\n';
         util::PrintTable(eigen_info.scalar_table, {"Eigenvector (x)", "A * x", "(A * x) / x"});
         std::cout << '\n';
@@ -70,7 +74,7 @@ void Semester6Task4() {
     semester6_task4::PrintEigen(matrix4, {1e-2, 1e-5, 1e-10});
 
     model::Matrix matrix5 = model::Matrix::CreateGilbert(5);
-    semester6_task4::PrintEigen(matrix5, {1e-5, 1e-15});
+    semester6_task4::PrintEigen(matrix5, {1e-5, 1e-10});
 }
 
 }  // namespace tasks

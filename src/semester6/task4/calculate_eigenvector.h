@@ -12,6 +12,8 @@ struct EigenInfo {
     double scalar_eigenvalue;
     std::size_t power_iter_num;
     std::size_t scalar_iter_num;
+    double power_min_eigenvalue;
+    double scalar_min_eigenvalue;
 };
 
 EigenInfo CalculateEigenvector(model::Matrix const& matrix, double eps);

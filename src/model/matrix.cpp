@@ -225,12 +225,21 @@ std::pair<std::shared_ptr<Matrix>, std::shared_ptr<Matrix>> Matrix::LUDecomposit
     return {std::make_shared<Matrix>(l), std::make_shared<Matrix>(u)};
 }
 
-void Matrix::MultiplyByOrthogonal(std::size_t i, std::size_t j, double cosine, double sine) {
+void Matrix::MultiplyByOrthogonalLeft(std::size_t i, std::size_t j, double cosine, double sine) {
     for (std::size_t k = 0; k != matrix_.size(); ++k) {
         double new_i = matrix_[i][k] * cosine - matrix_[j][k] * sine;
         double new_j = matrix_[i][k] * sine + matrix_[j][k] * cosine;
         matrix_[i][k] = new_i;
         matrix_[j][k] = new_j;
+    }
+}
+
+void Matrix::MultiplyByOrthogonalRight(std::size_t i, std::size_t j, double cosine, double sine) {
+    for (std::size_t k = 0; k != matrix_.size(); ++k) {
+        double new_i = matrix_[k][i] * cosine + matrix_[k][j] * sine;
+        double new_j = -matrix_[k][i] * sine + matrix_[k][j] * cosine;
+        matrix_[k][i] = new_i;
+        matrix_[k][j] = new_j;
     }
 }
 
@@ -246,8 +255,8 @@ std::pair<std::shared_ptr<Matrix>, std::shared_ptr<Matrix>> Matrix::QRDecomposit
                 double root = std::sqrt(r[i][i] * r[i][i] + r[j][i] * r[j][i]);
                 double cosine = r[i][i] / root;
                 double sine = -r[j][i] / root;
-                r.MultiplyByOrthogonal(i, j, cosine, sine);
-                q.MultiplyByOrthogonal(i, j, cosine, sine);
+                r.MultiplyByOrthogonalLeft(i, j, cosine, sine);
+                q.MultiplyByOrthogonalLeft(i, j, cosine, sine);
             }
         }
     }
@@ -485,6 +494,73 @@ Matrix::EigenInfo Matrix::MinAbsoluteEigenvalue(double eps,
     Matrix::EigenInfo inv_info = inv.MaxAbsoluteEigenvalue(eps, eigenvalue_method);
     inv_info.eigenvalue = 1 / inv_info.eigenvalue;
     return inv_info;
+}
+
+double Matrix::CalculateNonDiagonalSum() const {
+    double non_diagonal_sum = 0;
+    for (std::size_t i = 0; i != matrix_.size(); ++i) {
+        for (std::size_t j = 0; j != matrix_.size(); ++j) {
+            if (i != j) {
+                non_diagonal_sum += matrix_[i][j] * matrix_[i][j];
+            }
+        }
+    }
+
+    return non_diagonal_sum;
+}
+
+Matrix::EigenValuesInfo Matrix::GetEigenValues(double eps) const {
+    if (!IsSymmetric()) {
+        throw std::runtime_error("Error: matrix must be symmetric");
+    }
+
+    Matrix matrix_copy{matrix_};
+
+    double non_diagonal_sum = CalculateNonDiagonalSum();
+    std::size_t iteration_num = 0;
+    do {
+        ++iteration_num;
+        double max_abs = 0;
+        std::size_t max_i;
+        std::size_t max_j;
+
+        for (std::size_t i = 0; i != matrix_copy.Size(); ++i) {
+            for (std::size_t j = 0; j != matrix_copy.Size(); ++j) {
+                if (i != j && std::abs(matrix_copy[i][j]) > max_abs) {
+                    max_abs = std::abs(matrix_copy[i][j]);
+                    max_i = i;
+                    max_j = j;
+                }
+            }
+        }
+        non_diagonal_sum -= 2 * matrix_copy[max_i][max_j] * matrix_copy[max_i][max_j];
+
+        double x = -2 * matrix_copy[max_i][max_j];
+        double y = matrix_copy[max_i][max_i] - matrix_copy[max_j][max_j];
+        double sine, cosine;
+        if (y == 0) {
+            cosine = 1 / std::sqrt(2);
+            sine = cosine;
+        } else {
+            double root = std::sqrt(x * x + y * y);
+            double value = std::abs(y) / root;
+            cosine = std::sqrt(0.5 + 0.5 * value);
+            sine = std::abs(x) / (2 * cosine * root);
+            if (x * y < 0) {
+                sine = -sine;
+            }
+        }
+
+        matrix_copy.MultiplyByOrthogonalLeft(max_i, max_j, cosine, sine);
+        matrix_copy.MultiplyByOrthogonalRight(max_i, max_j, cosine, -sine);
+    } while (non_diagonal_sum >= eps);
+
+    std::vector<double> eigenvalues(matrix_.size());
+    for (std::size_t i = 0; i != matrix_copy.Size(); ++i) {
+        eigenvalues[i] = matrix_copy[i][i];
+    }
+
+    return {std::move(eigenvalues), iteration_num};
 }
 
 bool Matrix::IsDiagonal() const {

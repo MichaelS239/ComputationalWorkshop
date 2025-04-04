@@ -34,6 +34,11 @@ private:
         std::size_t iteration_num;
     };
 
+    struct EigenValuesInfo {
+        std::vector<double> eigenvalues;
+        std::size_t iteration_num;
+    };
+
     std::vector<std::vector<double>> matrix_;
     std::shared_ptr<Matrix> l_cache_;
     std::shared_ptr<Matrix> u_cache_;
@@ -44,7 +49,8 @@ private:
                               double& result) const;
     std::vector<double> SolveUpperTriangularSystem(std::vector<double> const& vector) const;
     std::vector<double> SolveLowerTriangularSystem(std::vector<double> const& vector) const;
-    void MultiplyByOrthogonal(std::size_t i, std::size_t j, double cosine, double sine);
+    void MultiplyByOrthogonalLeft(std::size_t i, std::size_t j, double cosine, double sine);
+    void MultiplyByOrthogonalRight(std::size_t i, std::size_t j, double cosine, double sine);
 
     std::pair<std::vector<double>, std::size_t> JacobiIteration(std::vector<double> const& vector,
                                                                 double eps) const;
@@ -55,6 +61,8 @@ private:
                                                  double lower_bound, double upper_bound);
     EigenInfo PowerMethod(double eps) const;
     EigenInfo ScalarProductMethod(double eps) const;
+
+    double CalculateNonDiagonalSum() const;
 
 public:
     Matrix() = default;
@@ -121,6 +129,8 @@ public:
             double eps, EigenvalueMethod const eigenvalue_method = EigenvalueMethod::Power) const;
     Matrix::EigenInfo MinAbsoluteEigenvalue(
             double eps, EigenvalueMethod const eigenvalue_method = EigenvalueMethod::Power) const;
+
+    Matrix::EigenValuesInfo GetEigenValues(double eps) const;
 
     bool IsDiagonal() const;
     bool IsSymmetric() const;

@@ -5,6 +5,7 @@
 #include <memory>
 #include <random>
 #include <sstream>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -293,6 +294,10 @@ std::pair<std::vector<double>, std::size_t> Matrix::SolveSystem(
 
 std::pair<std::vector<double>, std::size_t> Matrix::JacobiIteration(
         std::vector<double> const& vector, double eps) const {
+    if (!IsDiagonallyDominant()) {
+        throw std::runtime_error("Error: matrix must be diagonally dominant");
+    }
+
     Matrix b{matrix_.size()};
     std::vector<double> c(matrix_.size());
     for (std::size_t i = 0; i != matrix_.size(); ++i) {
@@ -482,6 +487,46 @@ Matrix::EigenInfo Matrix::MinAbsoluteEigenvalue(double eps,
     return inv_info;
 }
 
+bool Matrix::IsDiagonal() const {
+    for (std::size_t i = 0; i != matrix_.size(); ++i) {
+        for (std::size_t j = 0; j != matrix_.size(); ++j) {
+            if (matrix_[i][j] != 0 && i != j) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+bool Matrix::IsSymmetric() const {
+    for (std::size_t i = 0; i != matrix_.size(); ++i) {
+        for (std::size_t j = i + 1; j != matrix_.size(); ++j) {
+            if (matrix_[i][j] != matrix_[j][i]) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+bool Matrix::IsDiagonallyDominant() const {
+    for (std::size_t i = 0; i != matrix_.size(); ++i) {
+        double sum = 0;
+        for (std::size_t j = 0; j != matrix_.size(); ++j) {
+            if (i != j) {
+                sum += std::abs(matrix_[i][j]);
+            }
+        }
+        if (std::abs(matrix_[i][i]) < sum) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 std::string Matrix::ToString() const {
     std::stringstream test_ss;
     test_ss.precision(15);
@@ -563,8 +608,8 @@ void Matrix::MakeSymmetric() {
     }
 }
 
-Matrix Matrix::CreateRandomDiagonalDominant(bool is_symmetric, std::size_t n, double lower_bound,
-                                            double upper_bound) {
+Matrix Matrix::CreateRandomDiagonallyDominant(bool is_symmetric, std::size_t n, double lower_bound,
+                                              double upper_bound) {
     Matrix matrix(n);
     std::random_device r;
     std::default_random_engine re(r());
@@ -612,8 +657,9 @@ Matrix Matrix::CreateRandomDiagonalDominant(bool is_symmetric, std::size_t n, do
     return matrix;
 }
 
-Matrix Matrix::CreateRandomDiagonalDominant(std::size_t n, double lower_bound, double upper_bound) {
-    return CreateRandomDiagonalDominant(false, n, lower_bound, upper_bound);
+Matrix Matrix::CreateRandomDiagonallyDominant(std::size_t n, double lower_bound,
+                                              double upper_bound) {
+    return CreateRandomDiagonallyDominant(false, n, lower_bound, upper_bound);
 }
 
 Matrix Matrix::CreateRandomSymmetric(std::size_t n, double lower_bound, double upper_bound) {
@@ -622,9 +668,9 @@ Matrix Matrix::CreateRandomSymmetric(std::size_t n, double lower_bound, double u
     return matrix;
 }
 
-Matrix Matrix::CreateRandomSymmetricDiagonalDominant(std::size_t n, double lower_bound,
-                                                     double upper_bound) {
-    return CreateRandomDiagonalDominant(true, n, lower_bound, upper_bound);
+Matrix Matrix::CreateRandomSymmetricDiagonallyDominant(std::size_t n, double lower_bound,
+                                                       double upper_bound) {
+    return CreateRandomDiagonallyDominant(true, n, lower_bound, upper_bound);
 }
 
 Matrix Matrix::CreateRandom(std::size_t n, double lower_bound, double upper_bound) {

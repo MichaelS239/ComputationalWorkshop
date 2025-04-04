@@ -51,8 +51,8 @@ private:
     std::pair<std::vector<double>, std::size_t> SeidelIteration(std::vector<double> const& vector,
                                                                 double eps) const;
     void MakeSymmetric();
-    static Matrix CreateRandomDiagonalDominant(bool is_symmetric, std::size_t n, double lower_bound,
-                                               double upper_bound);
+    static Matrix CreateRandomDiagonallyDominant(bool is_symmetric, std::size_t n,
+                                                 double lower_bound, double upper_bound);
     EigenInfo PowerMethod(double eps) const;
     EigenInfo ScalarProductMethod(double eps) const;
 
@@ -122,17 +122,21 @@ public:
     Matrix::EigenInfo MinAbsoluteEigenvalue(
             double eps, EigenvalueMethod const eigenvalue_method = EigenvalueMethod::Power) const;
 
+    bool IsDiagonal() const;
+    bool IsSymmetric() const;
+    bool IsDiagonallyDominant() const;
+
     std::string ToString() const;
 
     static Matrix CreateDiagonal(std::size_t n, double k);
     static Matrix CreateGilbert(std::size_t n);
     static Matrix CreateTridiagonal(std::size_t n);
-    static Matrix CreateRandomDiagonalDominant(std::size_t n, double lower_bound = -10,
-                                               double upper_bound = 10);
+    static Matrix CreateRandomDiagonallyDominant(std::size_t n, double lower_bound = -10,
+                                                 double upper_bound = 10);
     static Matrix CreateRandomSymmetric(std::size_t n, double lower_bound = -10,
                                         double upper_bound = 10);
-    static Matrix CreateRandomSymmetricDiagonalDominant(std::size_t n, double lower_bound = -10,
-                                                        double upper_bound = 10);
+    static Matrix CreateRandomSymmetricDiagonallyDominant(std::size_t n, double lower_bound = -10,
+                                                          double upper_bound = 10);
     static Matrix CreateRandom(std::size_t n, double lower_bound = -10, double upper_bound = 10);
 };
 

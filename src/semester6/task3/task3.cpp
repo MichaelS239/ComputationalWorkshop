@@ -48,16 +48,16 @@ void Semester6Task3() {
     }
     semester6_task3::PrintSystem(matrix2, {1e-5, 1e-15});
 
-    model::Matrix matrix3 = model::Matrix::CreateRandomDiagonalDominant(5);
+    model::Matrix matrix3 = model::Matrix::CreateRandomDiagonallyDominant(5);
     semester6_task3::PrintSystem(matrix3, {1e-5});
 
-    model::Matrix matrix4 = model::Matrix::CreateRandomSymmetricDiagonalDominant(5);
+    model::Matrix matrix4 = model::Matrix::CreateRandomSymmetricDiagonallyDominant(5);
     semester6_task3::PrintSystem(matrix4, {1e-5});
 
-    model::Matrix matrix5 = model::Matrix::CreateRandomSymmetricDiagonalDominant(1000);
+    model::Matrix matrix5 = model::Matrix::CreateRandomSymmetricDiagonallyDominant(1000);
     semester6_task3::PrintSystem(matrix5, {1e-5, 1e-10});
 
-    model::Matrix matrix6 = model::Matrix::CreateRandomSymmetricDiagonalDominant(2000);
+    model::Matrix matrix6 = model::Matrix::CreateRandomSymmetricDiagonallyDominant(2000);
     semester6_task3::PrintSystem(matrix6, {1e-5, 1e-10});
 }
 

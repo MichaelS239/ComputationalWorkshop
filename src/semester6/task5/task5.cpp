@@ -1,5 +1,6 @@
 #include "task5.h"
 
+#include <algorithm>
 #include <cstddef>
 #include <iomanip>
 #include <iostream>
@@ -19,13 +20,55 @@ void PrintEigen(model::Matrix const& matrix, std::vector<double> const& eps) {
     for (std::size_t k = 0; k != eps.size(); ++k) {
         std::cout << "Accuracy: " << eps[k] << '\n';
 
-        auto const& eigenvalues = matrix.GetEigenValues(eps[k]);
-        std::cout << "Eigenvalues: ";
-        for (std::size_t i = 0; i != eigenvalues.eigenvalues.size(); ++i) {
-            std::cout << std::setprecision(15) << eigenvalues.eigenvalues[i] << " ";
+        auto max_value_eigenvalues = matrix.GetEigenValues(eps[k]);
+        std::sort(max_value_eigenvalues.eigenvalues.begin(),
+                  max_value_eigenvalues.eigenvalues.end());
+        if (matrix.Size() <= 10) {
+            std::cout << "Eigenvalues of max value elimination: ";
+            for (std::size_t i = 0; i != max_value_eigenvalues.eigenvalues.size(); ++i) {
+                std::cout << std::setprecision(15) << max_value_eigenvalues.eigenvalues[i] << " ";
+            }
+            std::cout << '\n';
+        } else {
+            std::cout << "First five eigenvalues of max value elimination: ";
+            for (std::size_t i = 0; i != 5; ++i) {
+                std::cout << std::setprecision(15) << max_value_eigenvalues.eigenvalues[i] << " ";
+            }
+            std::cout << '\n';
+            std::cout << "Last five eigenvalues of max value elimination: ";
+            for (std::size_t i = max_value_eigenvalues.eigenvalues.size() - 5;
+                 i != max_value_eigenvalues.eigenvalues.size(); ++i) {
+                std::cout << std::setprecision(15) << max_value_eigenvalues.eigenvalues[i] << " ";
+            }
+            std::cout << '\n';
         }
-        std::cout << '\n';
-        std::cout << "Number of iterations: " << eigenvalues.iteration_num << '\n';
+        std::cout << "Number of iterations of max value elimination: "
+                  << max_value_eigenvalues.iteration_num << '\n';
+
+        auto cyclic_eigenvalues =
+                matrix.GetEigenValues(eps[k], model::EliminationChoiceMethod::Cyclic);
+        std::sort(cyclic_eigenvalues.eigenvalues.begin(), cyclic_eigenvalues.eigenvalues.end());
+        if (matrix.Size() <= 10) {
+            std::cout << "Eigenvalues of cyclic elimination: ";
+            for (std::size_t i = 0; i != cyclic_eigenvalues.eigenvalues.size(); ++i) {
+                std::cout << std::setprecision(15) << cyclic_eigenvalues.eigenvalues[i] << " ";
+            }
+            std::cout << '\n';
+        } else {
+            std::cout << "First five eigenvalues of cyclic elimination: ";
+            for (std::size_t i = 0; i != 5; ++i) {
+                std::cout << std::setprecision(15) << cyclic_eigenvalues.eigenvalues[i] << " ";
+            }
+            std::cout << '\n';
+            std::cout << "Last five eigenvalues of cyclic elimination: ";
+            for (std::size_t i = cyclic_eigenvalues.eigenvalues.size() - 5;
+                 i != cyclic_eigenvalues.eigenvalues.size(); ++i) {
+                std::cout << std::setprecision(15) << cyclic_eigenvalues.eigenvalues[i] << " ";
+            }
+            std::cout << '\n';
+        }
+        std::cout << "Number of iterations of cyclic elimination: "
+                  << cyclic_eigenvalues.iteration_num << '\n';
 
         auto const& max_eigenvalue = matrix.MaxAbsoluteEigenvalue(eps[k]);
         auto const& min_eigenvalue = matrix.MinAbsoluteEigenvalue(eps[k]);
@@ -55,6 +98,12 @@ void Semester6Task5() {
 
     model::Matrix matrix3 = model::Matrix::CreateGilbert(5);
     semester6_task5::PrintEigen(matrix3, {1e-5, 1e-10});
+
+    model::Matrix matrix4 = model::Matrix::CreateRandomSymmetric(100);
+    semester6_task5::PrintEigen(matrix4, {1e-5, 1e-7});
+
+    model::Matrix matrix5 = model::Matrix::CreateRandomSymmetric(300);
+    semester6_task5::PrintEigen(matrix5, {1e-2, 1e-3});
 }
 
 }  // namespace tasks

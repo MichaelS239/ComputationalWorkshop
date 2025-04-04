@@ -130,7 +130,9 @@ public:
     Matrix::EigenInfo MinAbsoluteEigenvalue(
             double eps, EigenvalueMethod const eigenvalue_method = EigenvalueMethod::Power) const;
 
-    Matrix::EigenValuesInfo GetEigenValues(double eps) const;
+    Matrix::EigenValuesInfo GetEigenValues(double eps,
+                                           EliminationChoiceMethod const elimination_method =
+                                                   EliminationChoiceMethod::MaxValue) const;
 
     bool IsDiagonal() const;
     bool IsSymmetric() const;

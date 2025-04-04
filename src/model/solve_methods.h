@@ -9,4 +9,6 @@ enum class IterationMethod { Jacobi, Seidel };
 
 enum class EigenvalueMethod { Power, ScalarProduct };
 
+enum class EliminationChoiceMethod { MaxValue, Cyclic };
+
 }  // namespace model

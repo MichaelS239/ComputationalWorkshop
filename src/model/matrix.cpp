@@ -509,7 +509,8 @@ double Matrix::CalculateNonDiagonalSum() const {
     return non_diagonal_sum;
 }
 
-Matrix::EigenValuesInfo Matrix::GetEigenValues(double eps) const {
+Matrix::EigenValuesInfo Matrix::GetEigenValues(
+        double eps, model::EliminationChoiceMethod const elimination_method) const {
     if (!IsSymmetric()) {
         throw std::runtime_error("Error: matrix must be symmetric");
     }
@@ -518,21 +519,40 @@ Matrix::EigenValuesInfo Matrix::GetEigenValues(double eps) const {
 
     double non_diagonal_sum = CalculateNonDiagonalSum();
     std::size_t iteration_num = 0;
+    std::size_t max_i = 0;
+    std::size_t max_j = 0;
     do {
         ++iteration_num;
         double max_abs = 0;
-        std::size_t max_i;
-        std::size_t max_j;
 
-        for (std::size_t i = 0; i != matrix_copy.Size(); ++i) {
-            for (std::size_t j = 0; j != matrix_copy.Size(); ++j) {
-                if (i != j && std::abs(matrix_copy[i][j]) > max_abs) {
-                    max_abs = std::abs(matrix_copy[i][j]);
-                    max_i = i;
-                    max_j = j;
+        switch (elimination_method) {
+            case model::EliminationChoiceMethod::MaxValue: {
+                max_i = 0;
+                max_j = 0;
+                for (std::size_t i = 0; i != matrix_copy.Size(); ++i) {
+                    for (std::size_t j = 0; j != matrix_copy.Size(); ++j) {
+                        if (i != j && std::abs(matrix_copy[i][j]) > max_abs) {
+                            max_abs = std::abs(matrix_copy[i][j]);
+                            max_i = i;
+                            max_j = j;
+                        }
+                    }
                 }
+                break;
             }
+            case model::EliminationChoiceMethod::Cyclic: {
+                if (max_j == matrix_.size() - 1) {
+                    max_i = (max_i + 1) % (matrix_.size() - 1);
+                    max_j = max_i + 1;
+                } else {
+                    ++max_j;
+                }
+                break;
+            }
+            default:
+                break;
         }
+
         non_diagonal_sum -= 2 * matrix_copy[max_i][max_j] * matrix_copy[max_i][max_j];
 
         double x = -2 * matrix_copy[max_i][max_j];

@@ -56,8 +56,8 @@ void Semester6Task6() {
     double a_value = 0;
     double b_value = 6;
     std::function<double(double)> precise_solution = [](double x) { return x * x * x - x; };
-    model::BoundaryCondition cond = {a, b, a_value, b_value,
-                                     model::BoundaryConditionKind::FirstKind};
+    model::BoundaryCondition<model::BoundaryConditionKind::FirstKind> cond = {a, b, a_value,
+                                                                              b_value};
     model::LinearODESolver solver({q, r}, f, cond);
     std::cout << "Precision: 1e-2" << '\n';
     auto [approximate_solution, info] = solver.Solve(1e-2);
@@ -77,13 +77,27 @@ void Semester6Task6() {
     std::cout << "Precise solution: u(x) = x^3 - x" << '\n';
     a_value = 2;
     b_value = 11;
-    model::BoundaryCondition cond1 = {a, b, a_value, b_value,
-                                      model::BoundaryConditionKind::SecondKind};
+    model::BoundaryCondition<model::BoundaryConditionKind::SecondKind> cond1 = {a, b, a_value,
+                                                                                b_value};
     model::LinearODESolver solver1({q, r}, f, cond1);
     std::cout << "Precision: 1e-5" << '\n';
     auto [approximate_solution3, info3] = solver1.Solve(1e-5);
     semester6_task6::PrintInfo(info3);
     semester6_task6::CompareSolutions(approximate_solution3, precise_solution, a, b);
+
+    std::cout << "Equation: u'' + 6x * u' - 12x^2 * u = 30x^3 - 12x^5, u(1) - u'(1) = -2, u(2) + "
+                 "u'(2) = 17"
+              << '\n';
+    std::cout << "Precise solution: u(x) = x^3 - x" << '\n';
+    a_value = -2;
+    b_value = 17;
+    model::BoundaryCondition<model::BoundaryConditionKind::ThirdKind> cond2 = {a, 1, -1, a_value,
+                                                                               b, 1, 1,  b_value};
+    model::LinearODESolver solver2({q, r}, f, cond2);
+    std::cout << "Precision: 1e-5" << '\n';
+    auto [approximate_solution4, info4] = solver2.Solve(1e-5);
+    semester6_task6::PrintInfo(info4);
+    semester6_task6::CompareSolutions(approximate_solution4, precise_solution, a, b);
 }
 
 }  // namespace tasks

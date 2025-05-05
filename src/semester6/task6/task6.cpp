@@ -45,6 +45,7 @@ namespace tasks {
 void Semester6Task6() {
     std::cout << "Boundary value problem: finite difference method" << '\n';
     std::cout << "Equation: u'' + 6x * u' - 12x^2 * u = 30x^3 - 12x^5, u(1) = 0, u(2) = 6" << '\n';
+    std::cout << "Precise solution: u(x) = x^3 - x" << '\n';
     std::function<double(double)> q = [](double x) { return 6 * x; };
     std::function<double(double)> r = [](double x) { return -12 * x * x; };
     std::function<double(double)> f = [](double x) {
@@ -70,6 +71,19 @@ void Semester6Task6() {
     auto [approximate_solution2, info2] = solver.Solve(1e-7);
     semester6_task6::PrintInfo(info2);
     semester6_task6::CompareSolutions(approximate_solution2, precise_solution, a, b);
+
+    std::cout << "Equation: u'' + 6x * u' - 12x^2 * u = 30x^3 - 12x^5, u'(1) = 2, u'(2) = 11"
+              << '\n';
+    std::cout << "Precise solution: u(x) = x^3 - x" << '\n';
+    a_value = 2;
+    b_value = 11;
+    model::BoundaryCondition cond1 = {a, b, a_value, b_value,
+                                      model::BoundaryConditionKind::SecondKind};
+    model::LinearODESolver solver1({q, r}, f, cond1);
+    std::cout << "Precision: 1e-5" << '\n';
+    auto [approximate_solution3, info3] = solver1.Solve(1e-5);
+    semester6_task6::PrintInfo(info3);
+    semester6_task6::CompareSolutions(approximate_solution3, precise_solution, a, b);
 }
 
 }  // namespace tasks

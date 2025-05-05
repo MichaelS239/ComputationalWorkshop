@@ -30,6 +30,15 @@ std::vector<double> LinearODESolver::CalculateSolution(std::size_t points_num) c
         coefs[0] = boundary_condition_.left_value;
         matrix[points_num][points_num] = 1;
         coefs[points_num] = boundary_condition_.right_value;
+    } else if (boundary_condition_.kind == BoundaryConditionKind::SecondKind) {
+        matrix[0][0] = -3 / (2 * h);
+        matrix[0][1] = 2 / h;
+        matrix[0][2] = -1 / (2 * h);
+        coefs[0] = boundary_condition_.left_value;
+        matrix[points_num][points_num] = 3 / (2 * h);
+        matrix[points_num][points_num - 1] = -2 / h;
+        matrix[points_num][points_num - 2] = 1 / (2 * h);
+        coefs[points_num] = boundary_condition_.right_value;
     }
     for (std::size_t i = 1; i != points_num; ++i) {
         matrix[i][i - 1] = 1 / (h * h) - lhs_.first(points[i]) / (2 * h);
@@ -37,7 +46,13 @@ std::vector<double> LinearODESolver::CalculateSolution(std::size_t points_num) c
         matrix[i][i + 1] = 1 / (h * h) + lhs_.first(points[i]) / (2 * h);
         coefs[i] = rhs_(points[i]);
     }
-    std::vector<double> solution = matrix.SolveTridiagonalSystem(coefs);
+
+    std::vector<double> solution;
+    if (boundary_condition_.kind == BoundaryConditionKind::FirstKind) {
+        solution = matrix.SolveTridiagonalSystem(coefs);
+    } else {
+        solution = matrix.SolveSystem(coefs);
+    }
 
     return solution;
 }

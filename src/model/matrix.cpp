@@ -177,6 +177,36 @@ std::vector<double> Matrix::SolveLowerTriangularSystem(std::vector<double> const
     return solution;
 }
 
+std::vector<double> Matrix::SolveTridiagonalSystem(std::vector<double> const& vector) const {
+    std::vector<double> first_coefs(vector.size() + 1);
+    std::vector<double> second_coefs(vector.size() + 1);
+    std::vector<double> solution(vector.size());
+
+    for (std::size_t i = 0; i != vector.size(); ++i) {
+        if (i == 0) {
+            first_coefs[i + 1] = -matrix_[i][i + 1] / matrix_[i][i];
+            second_coefs[i + 1] = vector[i] / matrix_[i][i];
+        } else if (i == vector.size() - 1) {
+            second_coefs[i + 1] = (matrix_[i][i - 1] * second_coefs[i] - vector[i]) /
+                                  (-matrix_[i][i] - matrix_[i][i - 1] * first_coefs[i]);
+        } else {
+            first_coefs[i + 1] =
+                    matrix_[i][i + 1] / (-matrix_[i][i] - matrix_[i][i - 1] * first_coefs[i]);
+            second_coefs[i + 1] = (matrix_[i][i - 1] * second_coefs[i] - vector[i]) /
+                                  (-matrix_[i][i] - matrix_[i][i - 1] * first_coefs[i]);
+        }
+    }
+
+    solution[vector.size() - 1] = second_coefs[vector.size()];
+    for (std::size_t i = 0; i != vector.size() - 1; ++i) {
+        solution[vector.size() - 2 - i] =
+                first_coefs[vector.size() - 1 - i] * solution[vector.size() - 1 - i] +
+                second_coefs[vector.size() - 1 - i];
+    }
+
+    return solution;
+}
+
 std::pair<Matrix, std::vector<double>> Matrix::GaussElimination(
         std::vector<double> const& vector) const {
     Matrix matrix_copy{matrix_};
@@ -617,6 +647,18 @@ bool Matrix::IsDiagonallyDominant() const {
         }
         if (std::abs(matrix_[i][i]) < sum) {
             return false;
+        }
+    }
+
+    return true;
+}
+
+bool Matrix::IsTridiagonal() const {
+    for (std::size_t i = 0; i != matrix_.size(); ++i) {
+        for (int j = 0; j != matrix_.size(); ++j) {
+            if (matrix_[i][j] != 0 && i != j && i != j - 1 && i != j + 1) {
+                return false;
+            }
         }
     }
 

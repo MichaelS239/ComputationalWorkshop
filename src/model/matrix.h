@@ -111,6 +111,7 @@ public:
     std::vector<double> MultiplyByVector(std::vector<double> const& vector) const;
     std::vector<double> SolveSystem(std::vector<double> const& vector,
                                     SolveMethod const solve_method = SolveMethod::Library) const;
+    std::vector<double> SolveTridiagonalSystem(std::vector<double> const& vector) const;
     std::pair<std::vector<double>, std::size_t> SolveSystem(
             std::vector<double> const& vector, double eps,
             IterationMethod const solve_method = IterationMethod::Jacobi) const;
@@ -137,6 +138,7 @@ public:
     bool IsDiagonal() const;
     bool IsSymmetric() const;
     bool IsDiagonallyDominant() const;
+    bool IsTridiagonal() const;
 
     std::string ToString() const;
 

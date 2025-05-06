@@ -207,6 +207,19 @@ public:
 
         return {std::move(solution_func), std::move(solve_info)};
     }
+
+    std::function<double(double)> Solve(std::size_t n) const {
+        model::Matrix m(2);
+        if constexpr (T == BoundaryConditionKind::FirstKind) {
+            m[0][0] = 1;
+            m[0][1] = a;
+            m[1][0] = 1;
+            m[1][1] = b;
+        } else if constexpr (T == BoundaryConditionKind::SecondKind) {
+        }
+        std::vector<double> vec = {boundary_condition_.left_value, boundary_condition_.right_value};
+        std::vector<double> coefs0 = m.SolveSystem(vec);
+    }
 };
 
 }  // namespace model

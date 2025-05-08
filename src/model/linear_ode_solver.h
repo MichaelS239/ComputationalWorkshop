@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <functional>
 #include <stdexcept>
@@ -9,6 +10,7 @@
 
 #include "boundary_condition.h"
 #include "matrix.h"
+#include "solve_methods.h"
 
 namespace model {
 
@@ -25,6 +27,15 @@ private:
         std::vector<double> points(n + 1);
         for (std::size_t i = 0; i != n + 1; ++i) {
             points[i] = a + i * h;
+        }
+        return points;
+    }
+
+    std::vector<double> CreateInnerPoints(double a, double b, std::size_t n) const {
+        std::vector<double> points(n);
+        double h = (b - a) / (n + 1);
+        for (std::size_t i = 0; i != n; ++i) {
+            points[i] = a + (i + 1) * h;
         }
         return points;
     }
@@ -119,6 +130,164 @@ private:
         return new_solution;
     }
 
+    std::vector<std::vector<double>> CalculateJacobiPolinomials(std::vector<double> const& points,
+                                                                std::size_t n,
+                                                                std::size_t k) const {
+        std::vector<std::vector<double>> coefs(n, std::vector<double>(points.size()));
+        for (std::size_t i = 0; i != points.size(); ++i) {
+            coefs[0][i] = 1;
+            if (n >= 2) {
+                coefs[1][i] = (k + 1) * points[i];
+            }
+        }
+        for (std::size_t i = 2; i < n; ++i) {
+            for (std::size_t j = 0; j != points.size(); ++j) {
+                coefs[i][j] =
+                        ((i - 2 + k + 2) * (2 * (i - 2) + 2 * k + 3) * points[j] * coefs[i - 1][j] -
+                         (i - 2 + k + 2) * (i - 2 + k + 1) * coefs[i - 2][j]) /
+                        ((i - 2 + 2 * k + 2) * (i - 2 + 2));
+            }
+        }
+
+        return coefs;
+    }
+
+    std::vector<std::vector<double>> CalculateJacobiDerivatives(std::vector<double> const& points,
+                                                                std::size_t n,
+                                                                std::size_t k) const {
+        std::vector<std::vector<double>> coefs = CalculateJacobiPolinomials(points, n - 1, k + 1);
+        std::vector<std::vector<double>> new_coefs(n, std::vector<double>(points.size()));
+        for (std::size_t i = 1; i < n; ++i) {
+            for (std::size_t j = 0; j != points.size(); ++j) {
+                new_coefs[i][j] = (i + 2 * k + 1) * coefs[i - 1][j] / 2;
+            }
+        }
+
+        return new_coefs;
+    }
+
+    std::vector<std::vector<double>> CalculateJacobiSecondDerivatives(
+            std::vector<double> const& points, std::size_t n, std::size_t k) const {
+        std::vector<std::vector<double>> coefs = CalculateJacobiDerivatives(points, n - 1, k + 1);
+        std::vector<std::vector<double>> new_coefs(n, std::vector<double>(points.size()));
+        for (std::size_t i = 1; i < n; ++i) {
+            for (std::size_t j = 0; j != points.size(); ++j) {
+                new_coefs[i][j] = (i + 2 * k + 1) * coefs[i - 1][j] / 2;
+            }
+        }
+
+        return new_coefs;
+    }
+
+    double CalculateJacobiPolinomial(std::size_t n, std::size_t k, double x) const {
+        if (n == 0) {
+            return 1;
+        }
+        if (n == 1) {
+            return (k + 1) * x;
+        }
+
+        double first_value = (n - 2 + k + 2) * (2 * (n - 2) + 2 * k + 3) * x *
+                             CalculateJacobiPolinomial(n - 1, k, x);
+        double second_value =
+                (n - 2 + k + 2) * (n - 2 + k + 1) * CalculateJacobiPolinomial(n - 2, k, x);
+
+        return (first_value - second_value) / ((n - 2 + 2 * k + 2) * (n - 2 + 2));
+    }
+
+    std::function<double(double)> CollocationMethod(std::vector<double> const& coefs0,
+                                                    std::vector<double> const& coefs1,
+                                                    std::vector<double> const& coefs2, double a,
+                                                    double b, std::size_t n) const {
+        std::vector<double> points = CreateInnerPoints(a, b, n);
+        std::vector<double> new_points(n);
+        for (std::size_t i = 0; i != n; ++i) {
+            new_points[i] = (2 * points[i] - b - a) / (b - a);
+        }
+        std::vector<std::vector<double>> values = CalculateJacobiPolinomials(new_points, n, 2);
+        std::vector<std::vector<double>> first_derivatives =
+                CalculateJacobiDerivatives(new_points, n, 2);
+        std::vector<std::vector<double>> second_derivatives =
+                CalculateJacobiSecondDerivatives(new_points, n, 2);
+
+        auto jacobi_polinomial = [this](std::size_t i, double x) {
+            return CalculateJacobiPolinomial(i, 2, x);
+        };
+
+        Matrix matrix(n);
+        std::vector<double> vec(n);
+        for (std::size_t i = 0; i != n; ++i) {
+            for (std::size_t j = 0; j != n; ++j) {
+                double second_derivative, first_derivative, value;
+                if (j == 0) {
+                    second_derivative = 2;
+                    first_derivative = 2 * points[i] + coefs1[0];
+                    value = points[i] * points[i] + coefs1[0] * points[i] + coefs1[1];
+                } else if (j == 1) {
+                    second_derivative = 6 * points[i];
+                    first_derivative = 3 * points[i] * points[i] + coefs2[0];
+                    value = points[i] * points[i] * points[i] + coefs2[0] * points[i] + coefs2[1];
+                } else {
+                    second_derivative =
+                            (1 - new_points[i] * new_points[i]) *
+                                    (1 - new_points[i] * new_points[i]) *
+                                    second_derivatives[j - 2][i] * 4 / ((b - a) * (b - a)) -
+                            first_derivatives[j - 2][i] * 8 * new_points[i] *
+                                    (1 - new_points[i] * new_points[i]) * 4 / ((b - a) * (b - a)) +
+                            values[j - 2][i] * 4 * (3 * new_points[i] * new_points[i] - 1) * 4 /
+                                    ((b - a) * (b - a));
+                    first_derivative = (1 - new_points[i] * new_points[i]) *
+                                               (1 - new_points[i] * new_points[i]) *
+                                               first_derivatives[j - 2][i] * 2 / (b - a) -
+                                       values[j - 2][i] * 4 * new_points[i] *
+                                               (1 - new_points[i] * new_points[i]) * 2 / (b - a);
+                    value = (1 - new_points[i] * new_points[i]) *
+                            (1 - new_points[i] * new_points[i]) * values[j - 2][i];
+                }
+                matrix[i][j] = second_derivative + lhs_.first(points[i]) * first_derivative +
+                               lhs_.second(points[i]) * value;
+            }
+            vec[i] = rhs_(points[i]) - lhs_.first(points[i]) * coefs0[1] -
+                     lhs_.second(points[i]) * (coefs0[0] + coefs0[1] * points[i]);
+        }
+
+        std::vector<double> solution = matrix.SolveSystem(vec);
+
+        std::function<double(double)> solution_func = [a, b, n, coefs0, coefs1, coefs2, solution,
+                                                       jacobi_polinomial](double x) {
+            if (x < a || x > b) return 0.0;
+            double value = coefs0[0] + coefs0[1] * x;
+            for (std::size_t i = 0; i != n; ++i) {
+                if (i == 0) {
+                    value += solution[i] * (x * x + coefs1[0] * x + coefs1[1]);
+                } else if (i == 1) {
+                    value += solution[i] * (x * x * x + coefs2[0] * x + coefs2[1]);
+                } else {
+                    double new_x = (2 * x - b - a) / (b - a);
+                    value += solution[i] * (1 - new_x * new_x) * (1 - new_x * new_x) *
+                             jacobi_polinomial(i - 2, new_x);
+                }
+            }
+            return value;
+        };
+
+        return solution_func;
+    }
+
+    std::function<double(double)> GalerkinMethod(std::vector<double> const& coefs0,
+                                                 std::vector<double> const& coefs1,
+                                                 std::vector<double> const& coefs2, double a,
+                                                 double b, std::size_t n) const {
+        return [](double x) { return 0.0; };
+    }
+
+    std::function<double(double)> RitzMethod(std::vector<double> const& coefs0,
+                                             std::vector<double> const& coefs1,
+                                             std::vector<double> const& coefs2, double a, double b,
+                                             std::size_t n) const {
+        return [](double x) { return 0.0; };
+    }
+
 public:
     LinearODESolver() = default;
 
@@ -208,7 +377,10 @@ public:
         return {std::move(solution_func), std::move(solve_info)};
     }
 
-    std::function<double(double)> Solve(std::size_t n) const {
+    std::function<double(double)> Solve(
+            std::size_t n, ODESolveMethod const method = ODESolveMethod::Collocation) const {
+        double a = boundary_condition_.left_boundary;
+        double b = boundary_condition_.right_boundary;
         model::Matrix m(2);
         if constexpr (T == BoundaryConditionKind::FirstKind) {
             m[0][0] = 1;
@@ -216,9 +388,89 @@ public:
             m[1][0] = 1;
             m[1][1] = b;
         } else if constexpr (T == BoundaryConditionKind::SecondKind) {
+            m[0][0] = 0;
+            m[0][1] = 1;
+            m[1][0] = 0;
+            m[1][1] = 1;
+        } else if constexpr (T == BoundaryConditionKind::ThirdKind) {
+            m[0][0] = boundary_condition_.left_value_coef;
+            m[0][1] = boundary_condition_.left_value_coef * a +
+                      boundary_condition_.left_derivative_coef;
+            m[1][0] = boundary_condition_.right_value_coef;
+            m[1][1] = boundary_condition_.right_value_coef * b +
+                      boundary_condition_.right_derivative_coef;
+        }
+        if (m.Determinant() == 0) {
+            throw std::runtime_error("Error: this task is not supported");
         }
         std::vector<double> vec = {boundary_condition_.left_value, boundary_condition_.right_value};
         std::vector<double> coefs0 = m.SolveSystem(vec);
+
+        Matrix m1(2);
+        std::vector<double> vec1(2);
+        if constexpr (T == BoundaryConditionKind::FirstKind) {
+            m1[0][0] = a;
+            m1[0][1] = 1;
+            m1[1][0] = b;
+            m1[1][1] = 1;
+            vec1[0] = -a * a;
+            vec1[1] = -b * b;
+        } else if constexpr (T == BoundaryConditionKind::SecondKind) {
+            m1[0][0] = 1;
+            m1[0][1] = 0;
+            m1[1][0] = 1;
+            m1[1][1] = 0;
+            vec1[0] = -2 * a;
+            vec1[1] = -2 * b;
+        } else if constexpr (T == BoundaryConditionKind::ThirdKind) {
+            m1[0][0] = a * boundary_condition_.left_value_coef +
+                       boundary_condition_.left_derivative_coef;
+            m1[0][1] = boundary_condition_.left_value_coef;
+            m1[1][0] = b * boundary_condition_.right_value_coef +
+                       boundary_condition_.right_derivative_coef;
+            m1[1][1] = boundary_condition_.right_value_coef;
+            vec1[0] = -boundary_condition_.left_value_coef * a * a -
+                      2 * a * boundary_condition_.left_derivative_coef;
+            vec1[1] = -boundary_condition_.right_value_coef * b * b -
+                      2 * b * boundary_condition_.right_derivative_coef;
+        }
+
+        if (m1.Determinant() == 0) {
+            throw std::runtime_error("Error: this task is not supported");
+        }
+        std::vector<double> coefs1 = m1.SolveSystem(vec1);
+
+        std::vector<double> vec2(2);
+        if constexpr (T == BoundaryConditionKind::FirstKind) {
+            vec2[0] = -a * a * a;
+            vec2[1] = -b * b * b;
+        } else if constexpr (T == BoundaryConditionKind::SecondKind) {
+            vec2[0] = -3 * a * a;
+            vec2[1] = -3 * b * b;
+        } else if constexpr (T == BoundaryConditionKind::ThirdKind) {
+            vec2[0] = -boundary_condition_.left_value_coef * a * a * a -
+                      3 * a * a * boundary_condition_.left_derivative_coef;
+            vec2[1] = -boundary_condition_.right_value_coef * b * b * b -
+                      3 * b * b * boundary_condition_.right_derivative_coef;
+        }
+        std::vector<double> coefs2 = m1.SolveSystem(vec2);
+
+        std::function<double(double)> solution;
+        switch (method) {
+            case ODESolveMethod::Collocation:
+                solution = CollocationMethod(coefs0, coefs1, coefs2, a, b, n);
+                break;
+            case ODESolveMethod::Galerkin:
+                solution = GalerkinMethod(coefs0, coefs1, coefs2, a, b, n);
+                break;
+            case ODESolveMethod::Ritz:
+                solution = RitzMethod(coefs0, coefs1, coefs2, a, b, n);
+                break;
+            default:
+                break;
+        }
+
+        return solution;
     }
 };
 

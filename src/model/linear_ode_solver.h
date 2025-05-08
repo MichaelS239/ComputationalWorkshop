@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "boundary_condition.h"
+#include "function.h"
 #include "matrix.h"
 #include "solve_methods.h"
 
@@ -19,8 +20,8 @@ using SolveInfo = std::vector<std::pair<double, double>>;
 template <BoundaryConditionKind T>
 class LinearODESolver {
 private:
-    std::pair<std::function<double(double)>, std::function<double(double)>> lhs_;
-    std::function<double(double)> rhs_;
+    std::pair<Func, Func> lhs_;
+    Func rhs_;
     BoundaryCondition<T> boundary_condition_;
 
     std::vector<double> CreatePoints(double a, double b, double h, std::size_t n) const {
@@ -195,10 +196,9 @@ private:
         return (first_value - second_value) / ((n - 2 + 2 * k + 2) * (n - 2 + 2));
     }
 
-    std::function<double(double)> CollocationMethod(std::vector<double> const& coefs0,
-                                                    std::vector<double> const& coefs1,
-                                                    std::vector<double> const& coefs2, double a,
-                                                    double b, std::size_t n) const {
+    Func CollocationMethod(std::vector<double> const& coefs0, std::vector<double> const& coefs1,
+                           std::vector<double> const& coefs2, double a, double b,
+                           std::size_t n) const {
         std::vector<double> points = CreateInnerPoints(a, b, n);
         std::vector<double> new_points(n);
         for (std::size_t i = 0; i != n; ++i) {
@@ -253,8 +253,8 @@ private:
 
         std::vector<double> solution = matrix.SolveSystem(vec);
 
-        std::function<double(double)> solution_func = [a, b, n, coefs0, coefs1, coefs2, solution,
-                                                       jacobi_polinomial](double x) {
+        Func solution_func = [a, b, n, coefs0, coefs1, coefs2, solution,
+                              jacobi_polinomial](double x) {
             if (x < a || x > b) return 0.0;
             double value = coefs0[0] + coefs0[1] * x;
             for (std::size_t i = 0; i != n; ++i) {
@@ -274,26 +274,22 @@ private:
         return solution_func;
     }
 
-    std::function<double(double)> GalerkinMethod(std::vector<double> const& coefs0,
-                                                 std::vector<double> const& coefs1,
-                                                 std::vector<double> const& coefs2, double a,
-                                                 double b, std::size_t n) const {
+    Func GalerkinMethod(std::vector<double> const& coefs0, std::vector<double> const& coefs1,
+                        std::vector<double> const& coefs2, double a, double b,
+                        std::size_t n) const {
         return [](double x) { return 0.0; };
     }
 
-    std::function<double(double)> RitzMethod(std::vector<double> const& coefs0,
-                                             std::vector<double> const& coefs1,
-                                             std::vector<double> const& coefs2, double a, double b,
-                                             std::size_t n) const {
+    Func RitzMethod(std::vector<double> const& coefs0, std::vector<double> const& coefs1,
+                    std::vector<double> const& coefs2, double a, double b, std::size_t n) const {
         return [](double x) { return 0.0; };
     }
 
 public:
     LinearODESolver() = default;
 
-    LinearODESolver(
-            std::pair<std::function<double(double)>, std::function<double(double)>> const& lhs,
-            std::function<double(double)> const& rhs, BoundaryCondition<T> const& boundary_cond)
+    LinearODESolver(std::pair<Func, Func> const& lhs, Func const& rhs,
+                    BoundaryCondition<T> const& boundary_cond)
         : lhs_(lhs), rhs_(rhs) {
         if (boundary_cond.left_boundary >= boundary_cond.right_boundary) {
             throw std::invalid_argument("Error: the left boundary must be less than the right one");
@@ -319,8 +315,7 @@ public:
         boundary_condition_ = boundary_cond;
     }
 
-    LinearODESolver(std::pair<std::function<double(double)>, std::function<double(double)>>&& lhs,
-                    std::function<double(double)>&& rhs, BoundaryCondition<T>&& boundary_cond)
+    LinearODESolver(std::pair<Func, Func>&& lhs, Func&& rhs, BoundaryCondition<T>&& boundary_cond)
         : lhs_(std::move(lhs)), rhs_(rhs) {
         if (boundary_cond.left_boundary >= boundary_cond.right_boundary) {
             throw std::invalid_argument("Error: the left boundary must be less than the right one");
@@ -346,7 +341,7 @@ public:
         boundary_condition_ = std::move(boundary_cond);
     }
 
-    std::pair<std::function<double(double)>, SolveInfo> Solve(double eps) const {
+    std::pair<Func, SolveInfo> Solve(double eps) const {
         SolveInfo solve_info;
         double a = boundary_condition_.left_boundary;
         double b = boundary_condition_.right_boundary;
@@ -368,7 +363,7 @@ public:
 
         double h = (b - a) / points_num;
         std::vector<double> points = CreatePoints(a, b, h, points_num);
-        std::function<double(double)> solution_func = [a, b, final_solution, points](double x) {
+        Func solution_func = [a, b, final_solution, points](double x) {
             if (x < a || x > b) return 0.0;
             std::size_t index = std::lower_bound(points.begin(), points.end(), x) - points.begin();
             return final_solution[index];
@@ -377,8 +372,7 @@ public:
         return {std::move(solution_func), std::move(solve_info)};
     }
 
-    std::function<double(double)> Solve(
-            std::size_t n, ODESolveMethod const method = ODESolveMethod::Collocation) const {
+    Func Solve(std::size_t n, ODESolveMethod const method = ODESolveMethod::Collocation) const {
         double a = boundary_condition_.left_boundary;
         double b = boundary_condition_.right_boundary;
         model::Matrix m(2);
@@ -455,7 +449,7 @@ public:
         }
         std::vector<double> coefs2 = m1.SolveSystem(vec2);
 
-        std::function<double(double)> solution;
+        Func solution;
         switch (method) {
             case ODESolveMethod::Collocation:
                 solution = CollocationMethod(coefs0, coefs1, coefs2, a, b, n);

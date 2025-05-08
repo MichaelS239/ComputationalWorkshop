@@ -6,12 +6,13 @@
 #include <iostream>
 #include <vector>
 
+#include "function.h"
 #include "model/linear_ode_solver.h"
 #include "util/table.h"
 
 namespace semester6_task6 {
-void CompareSolutions(std::function<double(double)> approximate_solution,
-                      std::function<double(double)> precise_solution, double a, double b) {
+void CompareSolutions(model::Func approximate_solution, model::Func precise_solution, double a,
+                      double b) {
     std::size_t points_num = 10;
     double h = (b - a) / points_num;
     std::vector<std::vector<double>> table(points_num + 1, std::vector<double>(4));
@@ -46,16 +47,14 @@ void Semester6Task6() {
     std::cout << "Boundary value problem: finite difference method" << '\n';
     std::cout << "Equation: u'' + 6x * u' - 12x^2 * u = 30x^3 - 12x^5, u(1) = 0, u(2) = 6" << '\n';
     std::cout << "Precise solution: u(x) = x^3 - x" << '\n';
-    std::function<double(double)> q = [](double x) { return 6 * x; };
-    std::function<double(double)> r = [](double x) { return -12 * x * x; };
-    std::function<double(double)> f = [](double x) {
-        return 30 * x * x * x - 12 * x * x * x * x * x;
-    };
+    model::Func q = [](double x) { return 6 * x; };
+    model::Func r = [](double x) { return -12 * x * x; };
+    model::Func f = [](double x) { return 30 * x * x * x - 12 * x * x * x * x * x; };
     double a = 1;
     double b = 2;
     double a_value = 0;
     double b_value = 6;
-    std::function<double(double)> precise_solution = [](double x) { return x * x * x - x; };
+    model::Func precise_solution = [](double x) { return x * x * x - x; };
     model::BoundaryCondition<model::BoundaryConditionKind::FirstKind> cond = {a, b, a_value,
                                                                               b_value};
     model::LinearODESolver solver({q, r}, f, cond);

@@ -241,6 +241,7 @@ private:
     std::vector<std::vector<double>> CalculateJacobiDerivatives(std::vector<double> const& points,
                                                                 std::size_t n,
                                                                 std::size_t k) const {
+        if (n == 0) return {};
         std::vector<std::vector<double>> coefs = CalculateJacobiPolinomials(points, n - 1, k + 1);
         std::vector<std::vector<double>> new_coefs(n, std::vector<double>(points.size()));
         for (std::size_t i = 1; i < n; ++i) {

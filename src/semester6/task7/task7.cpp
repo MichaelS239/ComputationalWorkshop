@@ -102,6 +102,41 @@ void Semester6Task7() {
     auto galerkin_approximate_solution5 = solver3.Solve(10, model::ODESolveMethod::Galerkin);
     semester6_task7::CompareSolutions(collocation_approximate_solution5,
                                       galerkin_approximate_solution5, precise_solution1, a1, b1);
+
+    std::cout << "Equation: u'' + x^2 * u' - x * u = 6 / x^4 - 3 / x, u(1) = 1, 3u(2) + u'(2) = 0.5"
+              << '\n';
+    std::cout << "Precise solution: u(x) = 1 / x^2" << '\n';
+    model::Func q2 = [](double x) { return x * x; };
+    model::Func r2 = [](double x) { return -x; };
+    model::Func f2 = [](double x) { return 6 / std::pow(x, 4) - 3 / x; };
+    double a2 = 1;
+    double b2 = 2;
+    double a_value2 = 1;
+    double b_value2 = 0.5;
+    model::Func precise_solution2 = [](double x) { return 1 / (x * x); };
+    model::BoundaryCondition<model::BoundaryConditionKind::ThirdKind> cond4 = {a2, 1, 0, a_value2,
+                                                                               b2, 3, 1, b_value2};
+    model::LinearODESolver solver4({q2, r2}, f2, cond4);
+    std::cout << "N = 1:" << '\n';
+    auto collocation_approximate_solution6 = solver4.Solve(1, model::ODESolveMethod::Collocation);
+    auto galerkin_approximate_solution6 = solver4.Solve(1, model::ODESolveMethod::Galerkin);
+    semester6_task7::CompareSolutions(collocation_approximate_solution6,
+                                      galerkin_approximate_solution6, precise_solution2, a2, b2);
+    std::cout << "N = 5:" << '\n';
+    auto collocation_approximate_solution7 = solver4.Solve(5, model::ODESolveMethod::Collocation);
+    auto galerkin_approximate_solution7 = solver4.Solve(5, model::ODESolveMethod::Galerkin);
+    semester6_task7::CompareSolutions(collocation_approximate_solution7,
+                                      galerkin_approximate_solution7, precise_solution2, a2, b2);
+    std::cout << "N = 10:" << '\n';
+    auto collocation_approximate_solution8 = solver4.Solve(10, model::ODESolveMethod::Collocation);
+    auto galerkin_approximate_solution8 = solver4.Solve(10, model::ODESolveMethod::Galerkin);
+    semester6_task7::CompareSolutions(collocation_approximate_solution8,
+                                      galerkin_approximate_solution8, precise_solution2, a2, b2);
+    std::cout << "N = 20:" << '\n';
+    auto collocation_approximate_solution9 = solver4.Solve(20, model::ODESolveMethod::Collocation);
+    auto galerkin_approximate_solution9 = solver4.Solve(20, model::ODESolveMethod::Galerkin);
+    semester6_task7::CompareSolutions(collocation_approximate_solution9,
+                                      galerkin_approximate_solution9, precise_solution2, a2, b2);
 }
 
 }  // namespace tasks

@@ -11,6 +11,6 @@ enum class EigenvalueMethod { Power, ScalarProduct };
 
 enum class EliminationChoiceMethod { MaxValue, Cyclic };
 
-enum class ODESolveMethod { Collocation, Galerkin, Ritz };
+enum class ODESolveMethod { Collocation, Galerkin };
 
 }  // namespace model

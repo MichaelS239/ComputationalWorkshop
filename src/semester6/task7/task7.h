@@ -3,9 +3,11 @@
 #include <cstddef>
 #include <functional>
 
+#include "function.h"
+
 namespace semester6_task7 {
-void CompareSolutions(std::function<double(double)> approximate_solution,
-                      std::function<double(double)> precise_solution, double a, double b);
+void CompareSolutions(model::Func approximate_solution, model::Func galerkin_approximate_solution,
+                      model::Func precise_solution, double a, double b);
 }  // namespace semester6_task7
 
 namespace tasks {

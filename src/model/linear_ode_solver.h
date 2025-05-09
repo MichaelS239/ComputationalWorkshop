@@ -18,10 +18,20 @@ namespace model {
 
 using SolveInfo = std::vector<std::pair<double, double>>;
 
+/**
+ * Solves linear second order ODE in the following form:
+ * u''(x) + p(x)u'(x) + q(x)u(x) = f(x), a <= x <= b
+ *
+ * Boundary condition:
+ * a0 * u(a) + a1 * u'(b) = A
+ * b0 * u(b) + b1 * u'(b) = B
+ */
 template <BoundaryConditionKind T>
 class LinearODESolver {
 private:
+    // {p(x), q(x)}
     std::pair<Func, Func> lhs_;
+    // f(x)
     Func rhs_;
     BoundaryCondition<T> boundary_condition_;
 

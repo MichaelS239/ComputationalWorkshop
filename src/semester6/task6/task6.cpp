@@ -47,8 +47,8 @@ void Semester6Task6() {
     std::cout << "Boundary value problem: finite difference method" << '\n';
     std::cout << "Equation: u'' + 6x * u' - 12x^2 * u = 30x^3 - 12x^5, u(1) = 0, u(2) = 6" << '\n';
     std::cout << "Precise solution: u(x) = x^3 - x" << '\n';
-    model::Func q = [](double x) { return 6 * x; };
-    model::Func r = [](double x) { return -12 * x * x; };
+    model::Func p = [](double x) { return 6 * x; };
+    model::Func q = [](double x) { return -12 * x * x; };
     model::Func f = [](double x) { return 30 * x * x * x - 12 * x * x * x * x * x; };
     double a = 1;
     double b = 2;
@@ -57,7 +57,7 @@ void Semester6Task6() {
     model::Func precise_solution = [](double x) { return x * x * x - x; };
     model::BoundaryCondition<model::BoundaryConditionKind::FirstKind> cond = {a, b, a_value,
                                                                               b_value};
-    model::LinearODESolver solver({q, r}, f, cond);
+    model::LinearODESolver solver({p, q}, f, cond);
     std::cout << "Precision: 1e-2" << '\n';
     auto [approximate_solution, info] = solver.Solve(1e-2);
     semester6_task6::PrintInfo(info);
@@ -78,7 +78,7 @@ void Semester6Task6() {
     b_value = 11;
     model::BoundaryCondition<model::BoundaryConditionKind::SecondKind> cond1 = {a, b, a_value,
                                                                                 b_value};
-    model::LinearODESolver solver1({q, r}, f, cond1);
+    model::LinearODESolver solver1({p, q}, f, cond1);
     std::cout << "Precision: 1e-5" << '\n';
     auto [approximate_solution3, info3] = solver1.Solve(1e-5);
     semester6_task6::PrintInfo(info3);
@@ -92,7 +92,7 @@ void Semester6Task6() {
     b_value = 17;
     model::BoundaryCondition<model::BoundaryConditionKind::ThirdKind> cond2 = {a, 1, -1, a_value,
                                                                                b, 1, 1,  b_value};
-    model::LinearODESolver solver2({q, r}, f, cond2);
+    model::LinearODESolver solver2({p, q}, f, cond2);
     std::cout << "Precision: 1e-5" << '\n';
     auto [approximate_solution4, info4] = solver2.Solve(1e-5);
     semester6_task6::PrintInfo(info4);

@@ -41,6 +41,7 @@ void Semester6Task8() {
     std::cout << "Equation: u_t(x, t) = 1/3 * u_xx(x, t) + 4xt - x^3, 0 <= x <= 1, 0 <= t <= 1"
               << '\n';
     std::cout << "Boundary conditions: u(x, 0) = 0, u(0, t) = 0, u(1, t) = t^2 - t" << '\n';
+    std::cout << "Precise solution: u(x, t) = x * t^2 - x^3 * t" << '\n';
 
     double k = static_cast<double>(1) / 3;
     double a = 1;
@@ -56,19 +57,24 @@ void Semester6Task8() {
     model::HeatEquationSolver solver(k, a, T, f, f0, f1, f2);
     std::cout << "h = 0.1, tau = 0.01:" << '\n';
     auto explicit_approximate_solution = solver.Solve(10, 100, model::HeatEquationScheme::Explicit);
-    auto implicit_approximate_solution = solver.Solve(10, 10, model::HeatEquationScheme::Implicit);
+    auto implicit_approximate_solution = solver.Solve(10, 100, model::HeatEquationScheme::Implicit);
     semester6_task8::CompareSolutions(explicit_approximate_solution, implicit_approximate_solution,
                                       precise_solution, a, T);
     std::cout << "h = 0.1, tau = 0.015:" << '\n';
     auto explicit_approximate_solution1 = solver.Solve(10, 67, model::HeatEquationScheme::Explicit);
-    auto implicit_approximate_solution1 = solver.Solve(10, 10, model::HeatEquationScheme::Implicit);
+    auto implicit_approximate_solution1 = solver.Solve(10, 67, model::HeatEquationScheme::Implicit);
     semester6_task8::CompareSolutions(explicit_approximate_solution1,
                                       implicit_approximate_solution1, precise_solution, a, T);
     std::cout << "h = 0.1, tau = 0.02:" << '\n';
     auto explicit_approximate_solution2 = solver.Solve(10, 50, model::HeatEquationScheme::Explicit);
-    auto implicit_approximate_solution2 = solver.Solve(10, 10, model::HeatEquationScheme::Implicit);
+    auto implicit_approximate_solution2 = solver.Solve(10, 50, model::HeatEquationScheme::Implicit);
     semester6_task8::CompareSolutions(explicit_approximate_solution2,
                                       implicit_approximate_solution2, precise_solution, a, T);
+    std::cout << "h = 0.1, tau = 0.1:" << '\n';
+    auto explicit_approximate_solution3 = solver.Solve(10, 10, model::HeatEquationScheme::Explicit);
+    auto implicit_approximate_solution3 = solver.Solve(10, 10, model::HeatEquationScheme::Implicit);
+    semester6_task8::CompareSolutions(explicit_approximate_solution3,
+                                      implicit_approximate_solution3, precise_solution, a, T);
 }
 
 }  // namespace tasks

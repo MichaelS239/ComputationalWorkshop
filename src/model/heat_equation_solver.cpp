@@ -5,6 +5,8 @@
 #include <utility>
 #include <vector>
 
+#include "matrix.h"
+
 namespace model {
 
 std::pair<std::vector<double>, std::vector<double>> HeatEquationSolver::CreatePoints(
@@ -35,12 +37,39 @@ TwoVariableFunc HeatEquationSolver::Solve(std::size_t N, std::size_t K,
         coefs[i][N] = f2(t_points[i]);
     }
 
+    double gamma = tau * k / (h * h);
     if (scheme == model::HeatEquationScheme::Explicit) {
-        double gamma = tau * k / (h * h);
         for (std::size_t i = 1; i != K + 1; ++i) {
             for (std::size_t j = 1; j != N; ++j) {
                 coefs[i][j] = gamma * coefs[i - 1][j - 1] + (1 - 2 * gamma) * coefs[i - 1][j] +
                               gamma * coefs[i - 1][j + 1] + tau * f(x_points[j], t_points[i - 1]);
+            }
+        }
+    } else if (scheme == model::HeatEquationScheme::Implicit) {
+        for (std::size_t i = 1; i != K + 1; ++i) {
+            Matrix matrix(N - 1);
+            std::vector<double> vec(N - 1);
+            for (std::size_t j = 1; j != N; ++j) {
+                if (j == 1) {
+                    matrix[j - 1][j - 1] = -(1 + 2 * gamma);
+                    matrix[j - 1][j] = gamma;
+                    vec[j - 1] = -coefs[i - 1][j] - tau * f(x_points[j], t_points[i]) -
+                                 gamma * coefs[i][j - 1];
+                } else if (j == N - 1) {
+                    matrix[j - 1][j - 2] = gamma;
+                    matrix[j - 1][j - 1] = -(1 + 2 * gamma);
+                    vec[j - 1] = -coefs[i - 1][j] - tau * f(x_points[j], t_points[i]) -
+                                 gamma * coefs[i][j + 1];
+                } else {
+                    matrix[j - 1][j - 2] = gamma;
+                    matrix[j - 1][j - 1] = -(1 + 2 * gamma);
+                    matrix[j - 1][j] = gamma;
+                    vec[j - 1] = -coefs[i - 1][j] - tau * f(x_points[j], t_points[i]);
+                }
+            }
+            std::vector<double> sol = matrix.SolveTridiagonalSystem(vec);
+            for (std::size_t j = 0; j != N - 1; ++j) {
+                coefs[i][j + 1] = sol[j];
             }
         }
     }

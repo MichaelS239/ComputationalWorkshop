@@ -1,8 +1,6 @@
 #pragma once
 
-#include <functional>
-
-#include "function.h"
+#include "model/function.h"
 #include "model/linear_ode_solver.h"
 
 namespace semester6_task6 {

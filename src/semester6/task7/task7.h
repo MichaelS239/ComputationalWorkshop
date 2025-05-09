@@ -1,9 +1,6 @@
 #pragma once
 
-#include <cstddef>
-#include <functional>
-
-#include "function.h"
+#include "model/function.h"
 
 namespace semester6_task7 {
 void CompareSolutions(model::Func approximate_solution, model::Func galerkin_approximate_solution,

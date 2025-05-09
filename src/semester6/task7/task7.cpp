@@ -6,7 +6,7 @@
 #include <iostream>
 #include <vector>
 
-#include "function.h"
+#include "model/function.h"
 #include "model/linear_ode_solver.h"
 #include "util/table.h"
 
@@ -28,6 +28,7 @@ void CompareSolutions(model::Func collocation_approximate_solution,
     util::PrintTable(table, {"Point", "Precise solution", "Collocation method", "Difference",
                              "Galerkin method", "Difference"});
 }
+
 }  // namespace semester6_task7
 
 namespace tasks {

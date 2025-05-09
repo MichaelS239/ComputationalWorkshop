@@ -6,7 +6,7 @@
 #include <iostream>
 #include <vector>
 
-#include "function.h"
+#include "model/function.h"
 #include "model/linear_ode_solver.h"
 #include "util/table.h"
 

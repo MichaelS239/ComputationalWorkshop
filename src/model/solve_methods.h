@@ -13,4 +13,6 @@ enum class EliminationChoiceMethod { MaxValue, Cyclic };
 
 enum class ODESolveMethod { Collocation, Galerkin };
 
+enum class HeatEquationScheme { Explicit, Implicit };
+
 }  // namespace model

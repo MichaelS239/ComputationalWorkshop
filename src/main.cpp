@@ -66,7 +66,7 @@ int main(int argc, char** argv) {
                 } else {
                     std::size_t pos;
                     int num = std::stoi(number, &pos);
-                    if (pos == number.size() && num >= 1 && num <= 8) {
+                    if (pos == number.size() && num >= 1 && num <= 10) {
                         task_num = num;
                     } else {
                         throw std::runtime_error("Error: wrong task number");
@@ -91,7 +91,7 @@ int main(int argc, char** argv) {
     task_num -= 1;
 
     if ((semester_num == 0 && (task_num == 3 || task_num >= tasks::semester5_tasks.size())) ||
-        (semester_num == 1 && task_num >= tasks::semester6_tasks.size())) {
+        (semester_num == 1 && (task_num == 8 || task_num >= tasks::semester6_tasks.size()))) {
         throw std::runtime_error("Error: wrong task number");
     }
 

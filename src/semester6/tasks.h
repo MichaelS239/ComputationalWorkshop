@@ -1,6 +1,7 @@
 #pragma once
 
 #include "task1/task1.h"
+#include "task10/task10.h"
 #include "task2/task2.h"
 #include "task3/task3.h"
 #include "task4/task4.h"

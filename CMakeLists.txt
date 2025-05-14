@@ -48,7 +48,7 @@ if(SEMESTER_NUM STREQUAL "5")
     endif()
 elseif(SEMESTER_NUM STREQUAL "6")
     if(TASK_NUM STREQUAL "1" OR TASK_NUM STREQUAL "2" OR TASK_NUM STREQUAL "3" OR TASK_NUM STREQUAL "4" OR TASK_NUM STREQUAL "5"
-    OR TASK_NUM STREQUAL "6" OR TASK_NUM STREQUAL "7" OR TASK_NUM STREQUAL "8")
+    OR TASK_NUM STREQUAL "6" OR TASK_NUM STREQUAL "7" OR TASK_NUM STREQUAL "8" OR TASK_NUM STREQUAL "10")
         file(GLOB_RECURSE lib_sources "src/util/*.h*" "src/util/*.cpp*" "src/util/*.cc*" "src/model/*.h*" "src/model/*.cpp*" "src/model/*.cc*"
         src/semester6/task${TASK_NUM}/*.h* src/semester6/task${TASK_NUM}/*.cpp* src/semester6/task${TASK_NUM}/*.cc*)
         set(run_sources src/semester6/task${TASK_NUM}/main.cpp)

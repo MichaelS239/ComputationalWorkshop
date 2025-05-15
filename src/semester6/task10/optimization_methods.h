@@ -5,6 +5,7 @@
 #include <cstddef>
 
 #include "model/function.h"
+#include "model/matrix.h"
 
 namespace semester6_task10 {
 
@@ -119,6 +120,46 @@ MethodInfo<N> NesterovMethod(model::MultivariableFunc<N> f, model::GradientFunc<
     double min_value = f(x1);
 
     return {std::move(x1), min_value, iter_num};
+}
+
+template <std::size_t N>
+MethodInfo<N> NewtonMethod(model::MultivariableFunc<N> f, model::GradientFunc<N> gradient,
+                           model::SecondDerivativeFunc<N> second_derivative, double eps) {
+    std::array<double, N> x0;
+    std::array<double, N> gradient_value;
+    for (std::size_t i = 0; i != N; ++i) {
+        x0[i] = 0;
+        gradient_value[i] = 0;
+    }
+    double norm = 0;
+    std::size_t iter_num = 0;
+    do {
+        if (iter_num == 200) {
+            break;
+        }
+        ++iter_num;
+        std::vector<double> gradient_vector(N);
+        for (std::size_t i = 0; i != N; ++i) {
+            gradient_vector[i] = gradient_value[i];
+        }
+        std::array<std::array<double, N>, N> second_derivative_value = second_derivative(x0);
+        model::Matrix second_derivative_matrix(N);
+        for (std::size_t i = 0; i != N; ++i) {
+            for (std::size_t j = 0; j != N; ++j) {
+                second_derivative_matrix[i][j] = second_derivative_value[i][j];
+            }
+        }
+        model::Matrix inverse = second_derivative_matrix.Inverse();
+        std::vector<double> coef = inverse.MultiplyByVector(gradient_vector);
+        for (std::size_t i = 0; i != N; ++i) {
+            x0[i] -= coef[i];
+        }
+        gradient_value = gradient(x0);
+        norm = Norm(gradient_value);
+    } while (norm >= eps);
+    double min_value = f(x0);
+
+    return {std::move(x0), min_value, iter_num};
 }
 
 }  // namespace semester6_task10

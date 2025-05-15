@@ -26,7 +26,7 @@ double Norm(std::array<double, N> const& vector) {
 
 template <std::size_t N>
 MethodInfo<N> GradientDescent(model::MultivariableFunc<N> f, model::GradientFunc<N> gradient,
-                              double eps, double gamma = 0.1) {
+                              double eps, double alpha = 0.1) {
     std::array<double, N> x0;
     std::array<double, N> gradient_value;
     for (std::size_t i = 0; i != N; ++i) {
@@ -41,7 +41,7 @@ MethodInfo<N> GradientDescent(model::MultivariableFunc<N> f, model::GradientFunc
         }
         ++iter_num;
         for (std::size_t i = 0; i != N; ++i) {
-            x0[i] -= gamma * gradient_value[i];
+            x0[i] -= alpha * gradient_value[i];
         }
         gradient_value = gradient(x0);
         norm = Norm(gradient_value);
@@ -52,8 +52,8 @@ MethodInfo<N> GradientDescent(model::MultivariableFunc<N> f, model::GradientFunc
 }
 
 template <std::size_t N>
-MethodInfo<N> HeavyBall(model::MultivariableFunc<N> f, model::GradientFunc<N> gradient, double eps,
-                        double alpha = 0.1, double beta = 0.1) {
+MethodInfo<N> HeavyBallMethod(model::MultivariableFunc<N> f, model::GradientFunc<N> gradient,
+                              double eps, double alpha = 0.1, double beta = 0.3) {
     std::array<double, N> x0;
     std::array<double, N> x1;
     std::array<double, N> x2;
@@ -82,6 +82,43 @@ MethodInfo<N> HeavyBall(model::MultivariableFunc<N> f, model::GradientFunc<N> gr
     double min_value = f(x2);
 
     return {std::move(x2), min_value, iter_num};
+}
+
+template <std::size_t N>
+MethodInfo<N> NesterovMethod(model::MultivariableFunc<N> f, model::GradientFunc<N> gradient,
+                             double eps, double alpha = 0.1, double beta = 0.3) {
+    std::array<double, N> x0;
+    std::array<double, N> x1;
+    std::array<double, N> y0;
+    std::array<double, N> y0_gradient_value;
+    for (std::size_t i = 0; i != N; ++i) {
+        x0[i] = 0;
+        x1[i] = 0;
+        y0[i] = 0;
+        y0_gradient_value[i] = 0;
+    }
+    std::size_t iter_num = 0;
+    std::array<double, N> gradient_value = gradient(x0);
+    double norm = Norm(gradient_value);
+    while (norm >= eps) {
+        if (iter_num == 200) {
+            break;
+        }
+        ++iter_num;
+        y0_gradient_value = gradient(y0);
+        for (std::size_t i = 0; i != N; ++i) {
+            x1[i] = y0[i] - alpha * y0_gradient_value[i];
+        }
+        for (std::size_t i = 0; i != N; ++i) {
+            y0[i] = x1[i] + beta * (x1[i] - x0[i]);
+        }
+        gradient_value = gradient(x1);
+        norm = Norm(gradient_value);
+        x0 = x1;
+    }
+    double min_value = f(x1);
+
+    return {std::move(x1), min_value, iter_num};
 }
 
 }  // namespace semester6_task10

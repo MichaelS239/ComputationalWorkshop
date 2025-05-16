@@ -66,7 +66,7 @@ int main(int argc, char** argv) {
                 } else {
                     std::size_t pos;
                     int num = std::stoi(number, &pos);
-                    if (pos == number.size() && num >= 1 && num <= 10) {
+                    if (pos == number.size() && num >= 1 && num <= 11) {
                         task_num = num;
                     } else {
                         throw std::runtime_error("Error: wrong task number");

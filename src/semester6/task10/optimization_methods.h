@@ -3,6 +3,7 @@
 #include <array>
 #include <cmath>
 #include <cstddef>
+#include <vector>
 
 #include "model/function.h"
 #include "model/matrix.h"

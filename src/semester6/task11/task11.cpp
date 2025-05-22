@@ -8,24 +8,6 @@
 namespace tasks {
 void Semester6Task11() {
     std::cout << "Multivariable optimization with constraints" << '\n';
-    /*std::cout << "Function: f(x) = (x - 2) * (x - 2)" << '\n';
-
-    model::MultivariableFunc<1> f = [](std::array<double, 1> const& x) {
-        return (x[0] - 2) * (x[0] - 2);
-    };
-    model::GradientFunc<1> f_gradient = [](std::array<double, 1> const& x) {
-        std::array<double, 1> result = {2 * (x[0] - 2)};
-        return result;
-    };
-    model::SecondDerivativeFunc<1> f_second_derivative = [](std::array<double, 1> const& x) {
-        std::array<std::array<double, 1>, 1> result = {{2}};
-        return result;
-    };
-
-    std::cout << "Precise local minimum: x0 = 2, f(x0) = 0" << '\n';
-    std::cout << "Accuracy: 1e-5" << '\n';
-    semester6_task11::CompareSolutions({2}, 0, f, f_gradient, f_second_derivative, 1e-5,
-                                       {{0.1, 0.3}});*/
 
     std::cout << "Function: f(x, y) = ((x - 2) + (y - 1)) ^ 2 / 4 + ((x - 2) - (y - 1)) ^ 2"
               << '\n';
@@ -53,11 +35,12 @@ void Semester6Task11() {
         return 0;
     };
 
-    semester6_task11::CompareSolutions({2, 1}, 0, f1, f1_gradient,
-                                       {{f1_boundary,
-                                         {f1_boundary_derivative_x, f1_boundary_derivative_y},
-                                         semester6_task11::BoundaryType::Equal}},
-                                       {2, 0}, {0.5, 0.5}, 1e-5);
+    semester6_task11::CompareProjectionAndPenaltySolutions(
+            {2, 1}, 0, f1, f1_gradient,
+            {{f1_boundary,
+              {f1_boundary_derivative_x, f1_boundary_derivative_y},
+              semester6_task11::BoundaryType::Equal}},
+            {2, 0}, {0.5, 0.5}, 1e-5);
     std::cout << "D = {(x, y) : y = 1}" << '\n';
     model::MultivariableFunc<2> f1_boundary1 = [](std::array<double, 2> const& x) {
         return x[1] - 1;
@@ -68,43 +51,12 @@ void Semester6Task11() {
     model::MultivariableFunc<2> f1_boundary1_derivative_y = [](std::array<double, 2> const& x) {
         return 1;
     };
-    semester6_task11::CompareSolutions({2, 1}, 0, f1, f1_gradient,
-                                       {{f1_boundary1,
-                                         {f1_boundary1_derivative_x, f1_boundary1_derivative_y},
-                                         semester6_task11::BoundaryType::Equal}},
-                                       {0, 1}, {0.5, 0.5}, 1e-5);
-    // shouldn't work (non-linear boundaries)
-    /*std::cout << "D = {(x, y) : x^2 + y^2 = 5}, x0 = (-1, -2)" << '\n';
-    model::MultivariableFunc<2> f1_boundary2 = [](std::array<double, 2> const& x) {
-        return x[0] * x[0] + x[1] * x[1] - 5;
-    };
-    model::MultivariableFunc<2> f1_boundary2_derivative_x = [](std::array<double, 2> const& x) {
-        return 2 * x[0];
-    };
-    model::MultivariableFunc<2> f1_boundary2_derivative_y = [](std::array<double, 2> const& x) {
-        return 2 * x[1];
-    };
-    semester6_task11::CompareSolutions({2, 1}, 0, f1, f1_gradient,
-                                       {{f1_boundary2,
-                                         {f1_boundary2_derivative_x, f1_boundary2_derivative_y},
-                                         semester6_task11::BoundaryType::Equal}},
-                                       {-1, -2}, 1e-5);*/
-    // shouldn't work (non-linear boundaries)
-    /*std::cout << "D = {(x, y) : x^2 + y^2 = 4}, x0 = (-2, -2)" << '\n';
-    model::MultivariableFunc<2> f1_boundary3 = [](std::array<double, 2> const& x) {
-        return x[0] * x[0] + x[1] * x[1] - 4;
-    };
-    model::MultivariableFunc<2> f1_boundary3_derivative_x = [](std::array<double, 2> const& x) {
-        return 2 * x[0];
-    };
-    model::MultivariableFunc<2> f1_boundary3_derivative_y = [](std::array<double, 2> const& x) {
-        return 2 * x[1];
-    };
-    semester6_task11::CompareSolutions({2, 1}, 0, f1, f1_gradient,
-                                       {{f1_boundary3,
-                                         {f1_boundary3_derivative_x, f1_boundary3_derivative_y},
-                                         semester6_task11::BoundaryType::Equal}},
-                                       {-2, -2}, 1e-5);*/
+    semester6_task11::CompareProjectionAndPenaltySolutions(
+            {2, 1}, 0, f1, f1_gradient,
+            {{f1_boundary1,
+              {f1_boundary1_derivative_x, f1_boundary1_derivative_y},
+              semester6_task11::BoundaryType::Equal}},
+            {0, 1}, {0.5, 0.5}, 1e-5);
 
     std::cout << "D = {(x, y) : y = 0.5 * x}" << '\n';
     model::MultivariableFunc<2> f1_boundary4 = [](std::array<double, 2> const& x) {
@@ -116,38 +68,80 @@ void Semester6Task11() {
     model::MultivariableFunc<2> f1_boundary4_derivative_y = [](std::array<double, 2> const& x) {
         return 1;
     };
-    semester6_task11::CompareSolutions({2, 1}, 0, f1, f1_gradient,
-                                       {{f1_boundary4,
-                                         {f1_boundary4_derivative_x, f1_boundary4_derivative_y},
-                                         semester6_task11::BoundaryType::Equal}},
-                                       {0, 0}, {0.5, 0.5}, 1e-5);
-    /*std::cout << "Function: f(x, y) = 100 * (y - x^2)^2 + (1 - x)^2" << '\n';
+    semester6_task11::CompareProjectionAndPenaltySolutions(
+            {2, 1}, 0, f1, f1_gradient,
+            {{f1_boundary4,
+              {f1_boundary4_derivative_x, f1_boundary4_derivative_y},
+              semester6_task11::BoundaryType::Equal}},
+            {0, 0}, {0.5, 0.5}, 1e-5);
 
-    model::MultivariableFunc<2> f2 = [](std::array<double, 2> const& x) {
-        double x1 = x[0];
-        double x2 = x[1];
-        return 100 * (x2 - x1 * x1) * (x2 - x1 * x1) + (1 - x1) * (1 - x1);
+    std::cout << "D = {(x, y) : y <= 0.5 * x}" << '\n';
+    model::MultivariableFunc<2> f1_boundary5 = [](std::array<double, 2> const& x) {
+        return x[1] - 0.5 * x[0];
     };
-    model::GradientFunc<2> f2_gradient = [](std::array<double, 2> const& x) {
-        double x1 = x[0];
-        double x2 = x[1];
-        std::array<double, 2> result = {100 * 2 * (x2 - x1 * x1) * (-2 * x1) - 2 * (1 - x1),
-                                        2 * (x2 - x1 * x1)};
-        return result;
+    model::MultivariableFunc<2> f1_boundary5_derivative_x = [](std::array<double, 2> const& x) {
+        return -0.5;
     };
-    model::SecondDerivativeFunc<2> f2_second_derivative = [](std::array<double, 2> const& x) {
-        double x1 = x[0];
-        double x2 = x[1];
-        std::array<double, 2> first_row = {-400 * (x2 - 3 * x1 * x1) + 2, -400 * x1};
-        std::array<double, 2> second_row = {-4 * x1, 2};
-        std::array<std::array<double, 2>, 2> result = {std::move(first_row), std::move(second_row)};
-        return result;
+    model::MultivariableFunc<2> f1_boundary5_derivative_y = [](std::array<double, 2> const& x) {
+        return 1;
     };
+    semester6_task11::ComparePenaltyAndBarrierSolutions(
+            {2, 1}, 0, f1, f1_gradient,
+            {{f1_boundary5,
+              {f1_boundary5_derivative_x, f1_boundary5_derivative_y},
+              semester6_task11::BoundaryType::LessOrEqual}},
+            {0.5, 0.5}, {0.5, 0}, 1e-5);
 
-    std::cout << "Precise local minimum: x0 = (1, 1), f(x0) = 0" << '\n';
-    std::cout << "Accuracy: 1e-5" << '\n';
-    semester6_task11::CompareSolutions({1, 1}, 0, f2, f2_gradient, f2_second_derivative, 1e-5,
-                                       {{0.1, 0.3}});*/
+    std::cout << "D = {(x, y) : y <= x}" << '\n';
+    model::MultivariableFunc<2> f1_boundary6 = [](std::array<double, 2> const& x) {
+        return x[1] - x[0];
+    };
+    model::MultivariableFunc<2> f1_boundary6_derivative_x = [](std::array<double, 2> const& x) {
+        return -1;
+    };
+    model::MultivariableFunc<2> f1_boundary6_derivative_y = [](std::array<double, 2> const& x) {
+        return 1;
+    };
+    semester6_task11::ComparePenaltyAndBarrierSolutions(
+            {2, 1}, 0, f1, f1_gradient,
+            {{f1_boundary6,
+              {f1_boundary6_derivative_x, f1_boundary6_derivative_y},
+              semester6_task11::BoundaryType::LessOrEqual}},
+            {0, 0.5}, {0.5, 0}, 1e-5);
+
+    std::cout << "D = {(x, y) : y <= 2}" << '\n';
+    model::MultivariableFunc<2> f1_boundary7 = [](std::array<double, 2> const& x) {
+        return x[1] - 2;
+    };
+    model::MultivariableFunc<2> f1_boundary7_derivative_x = [](std::array<double, 2> const& x) {
+        return 0;
+    };
+    model::MultivariableFunc<2> f1_boundary7_derivative_y = [](std::array<double, 2> const& x) {
+        return 1;
+    };
+    semester6_task11::ComparePenaltyAndBarrierSolutions(
+            {2, 1}, 0, f1, f1_gradient,
+            {{f1_boundary7,
+              {f1_boundary7_derivative_x, f1_boundary7_derivative_y},
+              semester6_task11::BoundaryType::LessOrEqual}},
+            {0, 3}, {0, 0}, 1e-5);
+
+    std::cout << "D = {(x, y) : x^2 + y^2 <= 5}, x0 = (-1, -2)" << '\n';
+    model::MultivariableFunc<2> f1_boundary8 = [](std::array<double, 2> const& x) {
+        return x[0] * x[0] + x[1] * x[1] - 5;
+    };
+    model::MultivariableFunc<2> f1_boundary8_derivative_x = [](std::array<double, 2> const& x) {
+        return 2 * x[0];
+    };
+    model::MultivariableFunc<2> f1_boundary8_derivative_y = [](std::array<double, 2> const& x) {
+        return 2 * x[1];
+    };
+    semester6_task11::ComparePenaltyAndBarrierSolutions(
+            {2, 1}, 0, f1, f1_gradient,
+            {{f1_boundary8,
+              {f1_boundary8_derivative_x, f1_boundary8_derivative_y},
+              semester6_task11::BoundaryType::LessOrEqual}},
+            {2, 2}, {0, 0}, 1e-5);
 }
 
 }  // namespace tasks

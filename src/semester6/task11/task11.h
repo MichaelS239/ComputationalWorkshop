@@ -10,22 +10,44 @@
 
 namespace semester6_task11 {
 template <std::size_t N>
-void CompareSolutions(
-        std::array<double, N> const& precise_x, double precise_value, model::MultivariableFunc<N> f,
-        model::GradientFunc<N> gradient, std::vector<model::MultivariableFunc<N>> const& boundaries,
-        std::vector<std::vector<model::MultivariableFunc<N>>> const& boundaries_derivatives,
-        std::array<double, N> x_start, double eps) {
+void CompareSolutions(std::array<double, N> const& precise_x, double precise_value,
+                      model::MultivariableFunc<N> f, model::GradientFunc<N> gradient,
+                      std::vector<Boundary<N>> const& boundaries,
+                      std::array<double, N> const& projection_x_start,
+                      std::array<double, N> const& penalty_x_start, double eps) {
+    std::cout << "Gradient projection method: x0 = (";
+    for (std::size_t i = 0; i != N; ++i) {
+        std::cout << projection_x_start[i];
+        if (i != N - 1) {
+            std::cout << ", ";
+        }
+    }
+    std::cout << ")" << '\n';
     MethodInfo gradient_projection_info =
-            GradientProjectionMethod(f, gradient, boundaries, boundaries_derivatives, x_start, eps);
+            GradientProjectionMethod(f, gradient, boundaries, projection_x_start, eps);
     std::cout << "Number of iterations: " << gradient_projection_info.iteration_number << '\n';
+    std::cout << "Penalty function method: x0 = (";
+    for (std::size_t i = 0; i != N; ++i) {
+        std::cout << penalty_x_start[i];
+        if (i != N - 1) {
+            std::cout << ", ";
+        }
+    }
+    std::cout << ")" << '\n';
+    MethodInfo penalty_function_info =
+            PenaltyFunctionMethod(f, gradient, boundaries, penalty_x_start, eps);
+    std::cout << "Number of iterations: " << penalty_function_info.iteration_number << '\n';
 
-    std::vector<std::vector<double>> table(N, std::vector<double>(3));
+    std::vector<std::vector<double>> table(N, std::vector<double>(5));
     for (std::size_t j = 0; j != N; ++j) {
         table[j][0] = precise_x[j];
         table[j][1] = gradient_projection_info.local_minimum[j];
         table[j][2] = std::abs(table[j][1] - table[j][0]);
+        table[j][3] = penalty_function_info.local_minimum[j];
+        table[j][4] = std::abs(table[j][3] - table[j][0]);
     }
-    util::PrintTable(table, {"Precise solution", "Gradient projection method", "Difference"});
+    util::PrintTable(table, {"Precise solution", "Gradient projection method", "Difference",
+                             "Penalty function method", "Difference"});
 }
 
 }  // namespace semester6_task11

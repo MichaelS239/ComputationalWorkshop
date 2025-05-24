@@ -23,6 +23,7 @@ Possible options:
 int main(int argc, char** argv) {
     std::size_t semester_num = 0, task_num = 0;
     bool help = false;
+    bool is_not_number = false;
 
     for (int i = 1; i != argc; ++i) {
         std::string opt(argv[i]);
@@ -58,10 +59,13 @@ int main(int argc, char** argv) {
                     number = opt.substr(7, opt.size() - 7);
                 }
                 if (number == "4.1") {
+                    is_not_number = true;
                     task_num = 7;
                 } else if (number == "4.2") {
+                    is_not_number = true;
                     task_num = 8;
                 } else if (number == "4.3") {
+                    is_not_number = true;
                     task_num = 9;
                 } else {
                     std::size_t pos;
@@ -90,7 +94,8 @@ int main(int argc, char** argv) {
     semester_num -= 5;
     task_num -= 1;
 
-    if ((semester_num == 0 && (task_num == 3 || task_num >= tasks::semester5_tasks.size())) ||
+    if ((semester_num == 0 &&
+         (task_num == 3 || (task_num >= tasks::semester5_tasks.size() - 3 && !is_not_number))) ||
         (semester_num == 1 && (task_num == 8 || task_num >= tasks::semester6_tasks.size()))) {
         throw std::runtime_error("Error: wrong task number");
     }

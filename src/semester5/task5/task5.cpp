@@ -14,7 +14,8 @@
 
 namespace tasks {
 void Semester5Task5() {
-    std::cout << "Initial value problem for ODE" << '\n';
+    std::cout << "Numerical methods for solving initial value problems for ODE" << '\n';
+    std::cout << '\n';
     std::cout << "Initial value problem to study: y'(x) = -y(x) + e^(-x), y(0) = 1" << '\n';
 
     char c = 'y';

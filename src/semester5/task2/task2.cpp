@@ -12,7 +12,8 @@
 
 namespace tasks {
 void Semester5Task2() {
-    std::cout << "Polynomial interpolation" << '\n';
+    std::cout << "Lagrange interpolation" << '\n';
+    std::cout << '\n';
     std::cout << "Function under study: x^2 / (1 + x^2)" << '\n';
 
     int m;

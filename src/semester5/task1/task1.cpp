@@ -12,6 +12,7 @@ namespace tasks {
 
 void Semester5Task1() {
     std::cout << "Root-finding algorithms" << '\n';
+    std::cout << '\n';
     std::cout << "Function under study: f(x) = 8*cos(x)-x-6" << '\n';
 
     model::RootCalculator root_calculator(semester5_task1::f, semester5_task1::f_prime);

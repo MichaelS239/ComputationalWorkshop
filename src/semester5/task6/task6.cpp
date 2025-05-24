@@ -23,6 +23,7 @@ void Semester5Task6() {
     std::cout << "Numerical weighted integral calculation using quadrature formulas with maximum "
                  "order of accuracy"
               << '\n';
+    std::cout << '\n';
     std::cout << "Function to study: f(x) = sin(x)" << '\n';
     std::cout << "Segment: [0, 1]" << '\n';
     std::cout << "Precise value of the integral of the function: " << std::setprecision(15)

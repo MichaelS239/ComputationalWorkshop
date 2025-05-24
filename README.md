@@ -7,6 +7,11 @@ The project covers the following numerical methods:
 - Numerical differentiation
 - Numerical integration
 - Numerical methods for solving initial value problems for ODE
+- Numerical methods for solving systems of linear equations
+- Numerical methods for finding eigenvalues of a matrix
+- Numerical methods for solving boundary value problems
+- Numerical methods for solving heat equation
+- Multivariable optimization
 
 The topics of tasks are the following:
 - Semester 5:
@@ -20,6 +25,15 @@ The topics of tasks are the following:
   - Task 6: Numerical weighted integral calculation using quadrature formulas with maximum order of accuracy
 - Semester 6:
   - Task 1: Condition numbers of a matrix
+  - Task 2: Direct methods for solving systems of linear equations
+  - Task 3: Iterative methods for solving systems of linear equations
+  - Task 4: Numerical methods for finding the maximal absolute eigenvalue of a matrix
+  - Task 5: Numerical methods for finding all eigenvalues of a matrix
+  - Task 6: Boundary value problem: finite difference method
+  - Task 7: Boundary value problem: projection methods
+  - Task 8: Heat equation: finite difference methods
+  - Task 10: Multivariable optimization
+  - Task 11: Multivariable optimization with constraints
 
 # Prerequisites
 The following software is required to build the project:

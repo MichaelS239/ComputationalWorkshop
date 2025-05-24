@@ -143,6 +143,9 @@ template <std::size_t N>
 MethodInfo<N> PenaltyFunctionMethod(model::MultivariableFunc<N> f, model::GradientFunc<N> gradient,
                                     std::vector<Boundary<N>> const& boundaries,
                                     std::array<double, N> const& x_start, double eps) {
+    if (boundaries.size() >= N) {
+        throw std::runtime_error("Error: too many boundaries");
+    }
     model::MultivariableFunc<N> penalty_func = [boundaries](std::array<double, N> const& x) {
         double sum = 0;
         for (std::size_t i = 0; i != boundaries.size(); ++i) {
@@ -218,6 +221,9 @@ template <std::size_t N>
 MethodInfo<N> BarrierFunctionMethod(model::MultivariableFunc<N> f, model::GradientFunc<N> gradient,
                                     std::vector<Boundary<N>> const& boundaries,
                                     std::array<double, N> const& x_start, double eps) {
+    if (boundaries.size() >= N) {
+        throw std::runtime_error("Error: too many boundaries");
+    }
     model::MultivariableFunc<N> barrier_func = [boundaries](std::array<double, N> const& x) {
         double sum = 0;
         for (std::size_t i = 0; i != boundaries.size(); ++i) {

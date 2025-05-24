@@ -8,6 +8,7 @@
 namespace tasks {
 void Semester6Task10() {
     std::cout << "Multivariable optimization" << '\n';
+    std::cout << '\n';
     std::cout << "Function: f(x) = (x - 2) * (x - 2)" << '\n';
 
     model::MultivariableFunc<1> f = [](std::array<double, 1> const& x) {

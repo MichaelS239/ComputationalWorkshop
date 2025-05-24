@@ -49,6 +49,7 @@ void PrintSystem(model::Matrix const& matrix, std::vector<double> vector) {
 namespace tasks {
 void Semester6Task2() {
     std::cout << "Direct methods for solving systems of linear equations" << '\n';
+    std::cout << '\n';
 
     model::Matrix matrix1 = {{1, 7, 2}, {3, 5, 4}, {2, 8, 6}};
     std::vector<double> vector1 = {3, 7, 2};

@@ -8,7 +8,7 @@
 namespace tasks {
 void Semester6Task11() {
     std::cout << "Multivariable optimization with constraints" << '\n';
-
+    std::cout << '\n';
     std::cout << "Function: f(x, y) = ((x - 2) + (y - 1)) ^ 2 / 4 + ((x - 2) - (y - 1)) ^ 2"
               << '\n';
     std::cout << "Precise local minimum: x0 = (2, 1), f(x0) = 0" << '\n';

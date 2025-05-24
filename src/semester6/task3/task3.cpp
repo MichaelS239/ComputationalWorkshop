@@ -36,6 +36,8 @@ void PrintSystem(model::Matrix const& matrix, std::vector<double> const& eps,
 
 namespace tasks {
 void Semester6Task3() {
+    std::cout << "Iterative methods for solving systems of linear equations" << '\n';
+    std::cout << '\n';
     model::Matrix matrix1 = {{27, 7, 2}, {3, -30, 4}, {2, 8, 29}};
     std::vector<double> vector1 = {3, 7, 2};
 

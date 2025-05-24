@@ -34,6 +34,7 @@ void CompareSolutions(model::Func collocation_approximate_solution,
 namespace tasks {
 void Semester6Task7() {
     std::cout << "Boundary value problem: projection methods" << '\n';
+    std::cout << '\n';
     std::cout << "Equation: u'' + 6x * u' - 12x^2 * u = 30x^3 - 12x^5, u(1) = 0, u(2) = 6" << '\n';
     std::cout << "Precise solution: u(x) = x^3 - x" << '\n';
     model::Func p = [](double x) { return 6 * x; };

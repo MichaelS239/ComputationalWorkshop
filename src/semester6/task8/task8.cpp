@@ -38,6 +38,7 @@ void CompareSolutions(model::TwoVariableFunc explicit_approximate_solution,
 namespace tasks {
 void Semester6Task8() {
     std::cout << "Heat equation: finite difference methods" << '\n';
+    std::cout << '\n';
     std::cout << "Equation: u_t(x, t) = 1/3 * u_xx(x, t) + 4xt - x^3, 0 <= x <= 1, 0 <= t <= 1"
               << '\n';
     std::cout << "Boundary conditions: u(x, 0) = 0, u(0, t) = 0, u(1, t) = t^2 - t" << '\n';

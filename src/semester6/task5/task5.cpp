@@ -85,6 +85,8 @@ void PrintEigen(model::Matrix const& matrix, std::vector<double> const& eps) {
 
 namespace tasks {
 void Semester6Task5() {
+    std::cout << "Numerical methods for finding all eigenvalues of a matrix" << '\n';
+    std::cout << '\n';
     model::Matrix matrix1 = {{-0.81417, -0.01937, 0.41372},
                              {-0.01937, 0.54414, 0.00590},
                              {0.41372, 0.00590, -0.81445}};
